@@ -6,6 +6,9 @@ import model.Piece;
 import utile.Utilitaires;
 
 public class Game {
+	
+	String player1 = "";
+	String player2 = "";
 		
 	int nbPiecesO = 20;
 	int nbPiecesX = 20;
@@ -27,7 +30,14 @@ public class Game {
 	
 	ArrayList<Piece> alPieces = new ArrayList<Piece>();
 	
+	public Game(String p1, String p2) {
+		super();
+		this.player1 = p1;
+		this.player2 = p2;
+	}
 	public void game() throws IOException {
+		System.out.println("player 1 = " + player1 + "\tplayer2 = " + player2);
+		
 		// TODO Auto-generated method stub
 		tabMap = new char[sizeX][sizeY];
 		createPieceO();
