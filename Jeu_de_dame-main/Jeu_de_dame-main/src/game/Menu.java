@@ -43,19 +43,13 @@ public class Menu {
 	
 	private void startPlayervsPlayerGame() {
 		System.out.println("Joueur 1, choisissez un pseudo : ");
-		chooseAPseudo();
+		String player1 = Utilitaires.giveString();
 		System.out.println("Joueur 2, choisissez un pseudo : ");
-		chooseAPseudo();
-		Game g = new Game();
+		String player2 = Utilitaires.giveString();
+		Game g = new Game(player1, player2);
 		g.game();
 	}
-
-
-	private void chooseAPseudo() {
-		String choice = Utilitaires.giveString();
-		
-	}
-
+	
 	private boolean chooseToContinueMenu() {
 		String choice = Utilitaires.giveString();
 		switch(choice) {

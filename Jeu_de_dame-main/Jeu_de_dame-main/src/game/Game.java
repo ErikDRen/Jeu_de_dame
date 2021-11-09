@@ -7,8 +7,13 @@ import utile.Utilitaires;
 
 public class Game {
 
+
+	String player1 = "";
+	String player2 = "";
+
 	int nbPiecesO = 20;
 	int nbPiecesX = 20;
+	
 
 	int sizeX = 12;
 	int sizeY = 12;
@@ -19,8 +24,13 @@ public class Game {
 
 	ArrayList<Piece> alPieces = new ArrayList<Piece>();
 
+	public Game(String p1, String p2) {
+		super();
+		this.player1 = p1;
+		this.player2 = p2;
+	}
 	public void game() {
-		// TODO Auto-generated method stub
+		System.out.println("player 1 = " + player1 + "\tplayer2 = " + player2);
 		tabMap = new char[sizeX][sizeY];
 		createPieceO();
 		createPieceX();
