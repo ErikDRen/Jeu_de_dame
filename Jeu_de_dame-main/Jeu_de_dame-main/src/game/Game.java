@@ -16,20 +16,22 @@ public class Game {
 	public void game() {
 		// TODO Auto-generated method stub
 		tabMap = new char[sizeX][sizeY];
+		createPiece();
 		fillTab(tabMap, alPieces);
 		printTab(tabMap);
-		createPiece();
 	}
 
 	private void createPiece() {
 		// TODO Auto-generated method stub
-		Piece p1 = new Piece(2, 2, 'R', false);
+		Piece p1 = new Piece(1, 1, 'R', false);
 		alPieces.add(p1);
 	}
 
 	private void fillTab(char[][] map, ArrayList<Piece> alPieces) {
 		// TODO Auto-generated method stub
+		
 		for(int i = 0; i < map.length; i++) {
+			
 			for(int j = 0; j < map[i].length; j++) {
 				map[i][j]='.';
 				map[0][j]='*';
