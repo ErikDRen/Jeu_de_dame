@@ -6,12 +6,19 @@ import model.Piece;
 import utile.Utilitaires;
 
 public class Game {
+<<<<<<< HEAD
 
 	int sizeX = 12;
 	int sizeY = 12;
 
 	int nbPieces = 20;
 
+=======
+	
+	int sizeX = 12;
+	int sizeY = 12;
+	
+>>>>>>> 56c5a1574805cdebf7d438f710fd5ad3143ae787
 	char[][] tabMap;
 
 	boolean gameOn = true;
@@ -25,8 +32,13 @@ public class Game {
 		System.out.println(alPieces.toString());
 		do {
 			fillTab(tabMap, alPieces);
+<<<<<<< HEAD
 			printTab(tabMap);
 			selectPieceToMove(tabMap, alPieces);
+=======
+			printTab(tabMap,sizeY,sizeX);
+			selectPieceToMove(tabMap,alPieces);			
+>>>>>>> 56c5a1574805cdebf7d438f710fd5ad3143ae787
 		} while (gameOn);
 	}
 
@@ -55,6 +67,7 @@ public class Game {
 
 	private void fillTab(char[][] map, ArrayList<Piece> alPieces) {
 		// TODO Auto-generated method stub
+<<<<<<< HEAD
 
 		for (int i = 0; i < map.length; i++) {
 
@@ -62,6 +75,16 @@ public class Game {
 				map[i][j] = '.';
 				map[0][j] = '*';
 				map[map.length - 1][j] = '*';
+=======
+		
+		for(int i = 0; i < map.length; i++) {
+			
+			for(int j = 0; j < map[i].length; j++) {
+				map[i][j]='-';
+				map[0][j]='*';
+				map[map.length-1][j]='*';
+				
+>>>>>>> 56c5a1574805cdebf7d438f710fd5ad3143ae787
 			}
 			map[i][0] = '*';
 			map[i][map[i].length - 1] = '*';
@@ -70,13 +93,52 @@ public class Game {
 			map[piece.getX()][piece.getY()] = piece.getCouleur();
 		}
 	}
+<<<<<<< HEAD
 
 	public static void printTab(char[][] map) {
 		for (int i = 0; i < map.length; i++) {
 			for (int j = 0; j < map[i].length; j++) {
-				System.out.print(map[j][i]);
+=======
+	
+	
+	
+	public static void printTab(char[][] map, int sizeY, int sizeX) {
+		char c = 'a';
+		System.out.print("  ");
+
+		
+		for(int i = 0; i<map.length; i++) {
+			if (i != 0 && i != sizeY - 1) {
+				System.out.print(c);
+				c++;
+				System.out.print(" ");
+				
 			}
+			
+			if (i == sizeY - 1) {
+				System.out.print("  ");
+			}
+			
+			for(int j = 0; j<map[i].length; j++) {
+>>>>>>> 56c5a1574805cdebf7d438f710fd5ad3143ae787
+				System.out.print(map[j][i]);
+				System.out.print(" ");
+			}
+
 			System.out.println();
+			
+			
+		}
+		System.out.print("    ");
+		for(int i = 0; i < sizeX; i++) {
+			if (i != 0 && i != sizeX - 1) {
+				System.out.print(i);
+				System.out.print(" ");
+			}
+			
+			
+			
+			
 		}
 	}
 
