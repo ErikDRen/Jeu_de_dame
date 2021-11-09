@@ -1,10 +1,12 @@
 package game;
 
+import java.io.IOException;
+
 import utile.Utilitaires;
 
 public class Menu {
-	
-	public void displayMenu() {
+
+	public void displayMenu() throws IOException {
 		boolean gameOn = true;
 		System.out.println("!!! WELCOME TO DRAUGHT GAME !!!");
 		do {
@@ -15,8 +17,8 @@ public class Menu {
 			}
 		}while(gameOn);
 	}
-	
-	public void chooseNumberOfPlayerMenu() {
+
+	public void chooseNumberOfPlayerMenu() throws IOException {
 		boolean appliOn = true;
 		int choice = 0;
 		do {
@@ -40,16 +42,24 @@ public class Menu {
 			}
 		} while (appliOn);
 	}
-	
-	private void startPlayervsPlayerGame() {
+
+	private void startPlayervsPlayerGame() throws IOException {
+		
 		System.out.println("Joueur 1, choisissez un pseudo : ");
 		String player1 = Utilitaires.giveString();
 		System.out.println("Joueur 2, choisissez un pseudo : ");
 		String player2 = Utilitaires.giveString();
 		Game g = new Game(player1, player2);
+		
 		g.game();
 	}
 	
+	private void chooseAPseudo() {
+		String choice = Utilitaires.giveString();
+
+	}
+
+
 	private boolean chooseToContinueMenu() {
 		String choice = Utilitaires.giveString();
 		switch(choice) {

@@ -1,11 +1,9 @@
 package game;
+import java.io.IOException;
 
-import utile.Tester;
 
 public class Main {
-	public  static void main(String[] args) {
-		Tester t = new Tester();
-		t.test();
+	public  static void main(String[] args) throws IOException {
 		Menu m = new Menu();
 		m.displayMenu();
 	}
