@@ -7,8 +7,8 @@ import utile.Utilitaires;
 
 public class Game {
 	
-	int sizeX = 10;
-	int sizeY = 10;
+	int sizeX = 12;
+	int sizeY = 12;
 	
 	char[][] tabMap;
 	
@@ -22,7 +22,7 @@ public class Game {
 		createPiece();
 		do {
 			fillTab(tabMap, alPieces);
-			printTab(tabMap);
+			printTab(tabMap,sizeY,sizeX);
 			selectPieceToMove(tabMap,alPieces);			
 		} while (gameOn);
 	}
@@ -41,9 +41,10 @@ public class Game {
 		for(int i = 0; i < map.length; i++) {
 			
 			for(int j = 0; j < map[i].length; j++) {
-				map[i][j]='.';
+				map[i][j]='-';
 				map[0][j]='*';
 				map[map.length-1][j]='*';
+				
 			}
 			map[i][0]='*';
 			map[i][map[i].length-1]='*';
@@ -52,12 +53,45 @@ public class Game {
 			map[piece.getX()][piece.getY()]= piece.getCouleur();
 		}
 	}
-	public static void printTab(char[][] map) {
+	
+	
+	
+	public static void printTab(char[][] map, int sizeY, int sizeX) {
+		char c = 'a';
+		System.out.print("  ");
+
+		
 		for(int i = 0; i<map.length; i++) {
+			if (i != 0 && i != sizeY - 1) {
+				System.out.print(c);
+				c++;
+				System.out.print(" ");
+				
+			}
+			
+			if (i == sizeY - 1) {
+				System.out.print("  ");
+			}
+			
 			for(int j = 0; j<map[i].length; j++) {
 				System.out.print(map[j][i]);
+				System.out.print(" ");
 			}
+
 			System.out.println();
+			
+			
+		}
+		System.out.print("    ");
+		for(int i = 0; i < sizeX; i++) {
+			if (i != 0 && i != sizeX - 1) {
+				System.out.print(i);
+				System.out.print(" ");
+			}
+			
+			
+			
+			
 		}
 	}
 	

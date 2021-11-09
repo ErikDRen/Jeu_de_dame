@@ -41,5 +41,5 @@ public class Piece {
 		return "Piece [x=" + x + ", y=" + y + ", couleur=" + couleur + ", goBack=" + goBack + "]";
 	}
 	
-	
+
 }
