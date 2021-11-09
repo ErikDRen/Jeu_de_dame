@@ -1,6 +1,7 @@
 package game;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import model.Piece;
 import utile.Utilitaires;
@@ -122,7 +123,7 @@ public class Game {
 	}
 
 	public static void selectPieceToMove(char[][] map, ArrayList<Piece> alPieces) {
-		int selectedX = Utilitaires.giveInt();
+		/*int selectedX = Utilitaires.giveInt();
 		int selectedY = Utilitaires.giveInt();
 		for (Piece piece : alPieces) {
 			// map[piece.getX()][piece.getY()]= piece.getCouleur();
@@ -130,7 +131,24 @@ public class Game {
 				piece.setCouleur('T');
 				// juste un test pour voir si la selection marche
 			}
-		}
+		}*/
+		boolean selecting = true;
+		do {
+			System.out.println("Choose a valid position (ex : a3) : ");
+			String selectedXY = Utilitaires.giveString();
+			if(selectedXY.length() == 2) {
+				if(Utilitaires.isACorrectPosition(selectedXY)) {
+					List<String> selected = Utilitaires.convertAJToNumber(selectedXY);
+					for(Piece piece : alPieces) {
+						if(Integer.parseInt(selected.get(1)) == piece.getX() && Integer.parseInt(selected.get(0)) == piece.getY())
+						{
+							piece.setCouleur('T');
+							selecting = false;
+						}
+					}
+				}
+			}
+		}while(selecting);
 	}
 
 }
