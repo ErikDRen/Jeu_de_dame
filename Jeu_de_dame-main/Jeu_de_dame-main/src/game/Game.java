@@ -1,6 +1,8 @@
 package game;
 
+import java.io.IOException;
 import java.util.ArrayList;
+
 
 import model.Piece;
 import utile.Utilitaires;
@@ -10,20 +12,29 @@ public class Game {
 	int sizeX = 12;
 	int sizeY = 12;
 	
+	int nbPiecesO = 20;
+	int nbPiecesX = 20;
+	
 	char[][] tabMap;
+	
+	final static String FILENAME = "./history.txt";
 	
 	boolean gameOn = true;
 	
+	String nom = "Grégoire";
+	
 	ArrayList<Piece> alPieces = new ArrayList<Piece>();
 	
-	public void game() {
+	public void game() throws IOException {
 		// TODO Auto-generated method stub
 		tabMap = new char[sizeX][sizeY];
 		createPiece();
 		do {
 			fillTab(tabMap, alPieces);
 			printTab(tabMap,sizeY,sizeX);
-			selectPieceToMove(tabMap,alPieces);			
+			selectPieceToMove(tabMap,alPieces);	
+			Utilitaires.saveTab(tabMap,FILENAME);
+			Utilitaires.createFolderForUser(nom);
 		} while (gameOn);
 	}
 
@@ -74,7 +85,7 @@ public class Game {
 			}
 			
 			for(int j = 0; j<map[i].length; j++) {
-				System.out.print(map[j][i]);
+				System.out.print(map[i][j]);
 				System.out.print(" ");
 			}
 
