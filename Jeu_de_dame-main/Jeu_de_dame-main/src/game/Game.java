@@ -11,49 +11,28 @@ public class Game {
 	String player1 = "";
 	String player2 = "";
 
+	String fileNameP1 = "";
+	String fileNameP2 = "";
 	int nbPiecesO = 20;
 	int nbPiecesX = 20;
-
 	int sizeX = 12;
 	int sizeY = 12;
-
 	char[][] tabMap;
-
-	// final static String FILENAME = "./history.txt";
-
+	//final static String FILENAME = "./history.txt";
 	boolean gameOn = true;
-
 	ArrayList<Piece> alPieces = new ArrayList<Piece>();
-
+	
 	public Game(String p1, String p2) {
 		super();
 		this.player1 = p1;
 		this.player2 = p2;
 	}
-
+	
 	public void game() throws IOException {
-		System.out.println("player 1 = " + player1 + "\tplayer2 = " + player2);
-
-		// takes the date for the history
-		String dateNow = Utilitaires.giveDate();
-
-		// Create a folder if there is no folder for the player to save their game.
-		Utilitaires.createFolderForUser(player1);
-		Utilitaires.createFolderForUser(player2);
-
-		// Create name file for history
-		String fileNameP1 = "./" + player1 + "/history " + player1 + " VS " + player2 + ".txt";
-		String fileNameP2 = "./" + player2 + "/history " + player2 + " VS " + player1 + ".txt";
-
-		// TODO Auto-generated method stub
+		initFile();
 		tabMap = new char[sizeX][sizeY];
 		createPieceO();
 		createPieceX();
-
-		// Write the date in both players file
-		Utilitaires.newMatch(dateNow, fileNameP1);
-		Utilitaires.newMatch(dateNow, fileNameP2);
-
 		do {
 			fillTab(tabMap, alPieces);
 			printTab(tabMap, sizeY, sizeX);
@@ -61,6 +40,21 @@ public class Game {
 			Utilitaires.saveTab(tabMap, fileNameP1);
 			Utilitaires.saveTab(tabMap, fileNameP2);
 		} while (gameOn);
+	}
+	
+	private void initFile() throws IOException {
+		System.out.println("player 1 = " + player1 + "\tplayer2 = " + player2);
+//takes the date for the history
+		String dateNow = Utilitaires.giveDate();
+// Create a folder if there is no folder for the player to save their game.
+		Utilitaires.createFolderForUser(player1);
+		Utilitaires.createFolderForUser(player2);
+// Create name file for history
+		fileNameP1 = "./"+player1+"/history "+player1 + " VS "+ player2 +".txt";
+		fileNameP2 = "./"+player2+"/history "+player2 + " VS "+ player1 +".txt";	
+// Write the date in both players file
+		Utilitaires.newMatch(dateNow,fileNameP1);
+		Utilitaires.newMatch(dateNow,fileNameP2);
 	}
 
 	private void createPieceO() {
