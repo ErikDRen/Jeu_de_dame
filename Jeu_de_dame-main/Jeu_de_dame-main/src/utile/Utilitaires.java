@@ -10,8 +10,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Scanner;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Utilitaires {
+	
+	//Map for coordinates
     static Map<String, String> myMap = new HashMap<String, String>() {{
         put("a", "1");
         put("b", "2");
@@ -25,11 +29,13 @@ public class Utilitaires {
         put("j", "10");
     }};
     
+   
 	public static String giveString() {
 		Scanner sc = new Scanner(System.in);
 		String s = sc.nextLine();
 		return s;
 	}
+	
 	
 	public static int giveInt() {
 		Scanner sc = new Scanner(System.in);
@@ -47,9 +53,15 @@ public class Utilitaires {
 		return res;
 	}
 	
-	public static void saveTab(char[][] tabMap, String fileNames) throws IOException {
+	
+	//This function will create a file .txt to save the map each turn 
+	public static void saveTab(char[][] tabMap,String FILENAME) throws IOException {
+		
+
 			
-		BufferedWriter writer = new BufferedWriter(new FileWriter(fileNames,true));
+		//BufferedWriter writer = new BufferedWriter(new FileWriter("./" + player1Name + " VS " + player2Name + " at " + dateNow + ".txt",true));
+		
+		BufferedWriter writer = new BufferedWriter(new FileWriter(FILENAME,true));
 	    
 		StringBuffer str = new StringBuffer();
 		for (char[] i : tabMap) {
@@ -63,12 +75,47 @@ public class Utilitaires {
 	}
 	
 	
-	public static void createFolderForUser(String nom) throws IOException {
+	
+	//And put it in a directory which is the player's name
+	public static void createFolderForUser(String playerName) throws IOException {
 		
-		Path path = Paths.get("./"+ nom);
+		Path path = Paths.get("./"+ playerName);
 
 	    //java.nio.file.Files;
 	    Files.createDirectories(path);
 		
 	}
+	
+	
+
+
+	//This function will give the date
+	public static String giveDate() {
+		SimpleDateFormat s = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+		Date date = new Date();
+	    String dateNow = s.format(date);
+	    return dateNow;
+	  }
+
+
+	// We will write the date in the history file
+	public static void newMatch(String dateNow, String fileName) throws IOException {
+		
+		
+		BufferedWriter writer = new BufferedWriter(new FileWriter(fileName,true));
+	    
+		StringBuffer str = new StringBuffer();
+
+			str.append("This match was played at ");
+			str.append(dateNow);
+			str.append("\n");
+			str.append("\n");
+		
+		writer.write(str.toString()); 
+	    writer.close();
+		
+		
+		
+	}
+	
 }
