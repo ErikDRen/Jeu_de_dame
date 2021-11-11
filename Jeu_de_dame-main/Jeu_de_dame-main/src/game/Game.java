@@ -46,20 +46,28 @@ public class Game {
 	}
 	
 	private void playerTurn(){
-		Piece selectedPiece = selectPieceToMove(tabMap, alPieces);
-		boolean check = checkSelectedPiece(selectedPiece);
+		boolean check = false;
+		Piece selectedPiece;
+		do{
+			selectedPiece = selectPieceToMove(tabMap, alPieces);
+			check = checkSelectedPiece(selectedPiece);
+		}while(!check);
 		movePieceSelected(Utilitaires.giveString(), selectedPiece);
 	}
 
 	private boolean checkSelectedPiece(Piece pi){
 		if((!player1Turn && pi.getCouleur() == 'X') || (player1Turn) && pi.getCouleur() == 'O'){
-			return false
+			System.out.println("it's not the turn of this piece");
+			return false;
 		}
 		//Check if piece can move in 1 3 7 9 direction
-		// check for direction 1
-		/*if(tabMap[pi.getX()-1][pi.getY()+1]){
-
-		}*/
+		if((pi.getCouleur() == 'O' && tabMap[pi.getX()-1][pi.getY()+1] != '-' &&// check for direction 1
+		 tabMap[pi.getX()+1][pi.getY()+1] != '-') ||	// check for direction 3
+		 (pi.getCouleur() == 'X' && tabMap[pi.getX()-1][pi.getY()-1] != '-' &&	// check for direction 7
+		 tabMap[pi.getX()+1][pi.getY()-1] != '-')){	// check for direction 9
+		 	System.out.println("Can't move this piece");
+			return false;
+		}
 		return true;
 	}
 	private void initFile() throws IOException {
@@ -181,7 +189,7 @@ public class Game {
 	public boolean movePieceSelected(String move, Piece piece) {
 		switch (move) {
 		case "1":
-			if (piece.getCouleur == 'O' && tabMap[piece.getX() - 1][piece.getY() + 1] == '-' ) {
+			if (piece.getCouleur() == 'O' && tabMap[piece.getX() - 1][piece.getY() + 1] == '-' ) {
 				tabMap[piece.getX()][piece.getY()] = '-';
 				piece.setX(piece.getX()-1);
 				piece.setY(piece.getY()+1);
@@ -190,9 +198,8 @@ public class Game {
 			}else{
 				return false;
 			}
-			break;
 		case "3":
-			if (piece.getCouleur == 'O' && tabMap[piece.getX() + 1][piece.getY() + 1] == '-') {
+			if (piece.getCouleur() == 'O' && tabMap[piece.getX() + 1][piece.getY() + 1] == '-') {
 				tabMap[piece.getX()][piece.getY()] = '-';
 				piece.setX(piece.getX() + 1);
 				piece.setY(piece.getY() + 1);
@@ -201,9 +208,8 @@ public class Game {
 			}else{
 				return false;
 			}
-			break;
 		case "7":
-			if (piece.getCouleur == 'X' && tabMap[piece.getX() - 1][piece.getY() - 1] == '-') {
+			if (piece.getCouleur() == 'X' && tabMap[piece.getX() - 1][piece.getY() - 1] == '-') {
 				tabMap[piece.getX()][piece.getY()] = '-';
 				piece.setX(piece.getX() - 1);
 				piece.setY(piece.getY() - 1);
@@ -212,9 +218,8 @@ public class Game {
 			}else{
 				return false;
 			}
-			break;
 		case "9":
-			if (piece.getCouleur == 'X' && tabMap[piece.getX() + 1][piece.getY() - 1] == '-') {
+			if (piece.getCouleur() == 'X' && tabMap[piece.getX() + 1][piece.getY() - 1] == '-') {
 				tabMap[piece.getX()][piece.getY()] = '-';
 				piece.setX(piece.getX() + 1);
 				piece.setY(piece.getY() - 1);
@@ -223,7 +228,7 @@ public class Game {
 			}else{
 				return false;
 			}
-			break;
+
 		default:
 			System.out.println("default error");
 			return false;
