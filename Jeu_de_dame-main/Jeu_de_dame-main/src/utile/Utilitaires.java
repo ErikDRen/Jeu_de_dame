@@ -55,7 +55,7 @@ public class Utilitaires {
 	
 	
 	//This function will create a file .txt to save the map each turn 
-	public static void saveTab(char[][] tabMap,String FILENAME) throws IOException {
+	public static void saveTab(char[][] tabMap,String FILENAME, int sizeY) throws IOException {
 		
 
 			
@@ -64,10 +64,23 @@ public class Utilitaires {
 		BufferedWriter writer = new BufferedWriter(new FileWriter(FILENAME,true));
 	    
 		StringBuffer str = new StringBuffer();
-		for (char[] i : tabMap) {
-			str.append(i);
-			str.append("\n");
+
+		
+		for (int i = 0; i < tabMap.length; i++) {
+
+
+
+			for (int j = 0; j < tabMap[i].length; j++) {
+				str.append(tabMap[j][i]);
+				
+				
+			}
+
+			str.append('\n');
+
 		}
+		
+		
 		str.append("\n");
 		
 		writer.write(str.toString()); 

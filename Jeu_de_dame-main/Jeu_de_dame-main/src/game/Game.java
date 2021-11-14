@@ -40,8 +40,8 @@ public class Game {
 			printTab(tabMap, sizeY, sizeX);
 			playerTurn();
 			
-			Utilitaires.saveTab(tabMap, fileNameP1);
-			Utilitaires.saveTab(tabMap, fileNameP2);
+			Utilitaires.saveTab(tabMap, fileNameP1,sizeY);
+			Utilitaires.saveTab(tabMap, fileNameP2,sizeY);
 		} while (gameOn);
 	}
 	
