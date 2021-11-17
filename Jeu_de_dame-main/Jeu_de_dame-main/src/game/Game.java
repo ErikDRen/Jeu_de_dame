@@ -47,12 +47,16 @@ public class Game {
 	
 	private void playerTurn(){
 		boolean check = false;
+		boolean mooved = false;
 		Piece selectedPiece;
-		do{
-			selectedPiece = selectPieceToMove(tabMap, alPieces);
-			check = checkSelectedPiece(selectedPiece);
-		}while(!check);
-		movePieceSelected(Utilitaires.giveString(), selectedPiece);
+		do {
+			do{
+				selectedPiece = selectPieceToMove(tabMap, alPieces);
+				check = checkSelectedPiece(selectedPiece);
+			}while(!check);
+			mooved = movePieceSelected(Utilitaires.giveString(), selectedPiece);
+		}while(!mooved);
+		player1Turn = !player1Turn;
 	}
 
 	private boolean checkSelectedPiece(Piece pi){
@@ -68,6 +72,7 @@ public class Game {
 		 	System.out.println("Can't move this piece");
 			return false;
 		}
+		System.out.println("piece in " + pi.getX() + ", " + pi.getY()+ " selected !");
 		return true;
 	}
 	private void initFile() throws IOException {
