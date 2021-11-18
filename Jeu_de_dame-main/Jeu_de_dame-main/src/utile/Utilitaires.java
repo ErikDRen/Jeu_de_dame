@@ -10,8 +10,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Scanner;
+
+import model.Piece;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.ArrayList;
 
 public class Utilitaires {
 	
@@ -130,5 +134,75 @@ public class Utilitaires {
 		
 		
 	}
+
+		// This function will print the board "clear and pretty"
+	public static void printTab(char[][] map, int sizeY, int sizeX) {
+		char c = 'a';
+		System.out.print("  ");
+
+		for (int i = 0; i < map.length; i++) {
+			if (i != 0 && i != sizeY - 1) {
+				System.out.print(c);
+				c++;
+				System.out.print(" ");
+
+			}
+
+			if (i == sizeY - 1) {
+				System.out.print("  ");
+			}
+
+			for (int j = 0; j < map[i].length; j++) {
+				System.out.print(map[j][i]);
+				System.out.print(" ");
+			}
+
+			System.out.println();
+
+		}
+		System.out.print("    ");
+		for (int i = 0; i < sizeX; i++) {
+			if (i != 0 && i != sizeX - 1) {
+				System.out.print(i);
+				System.out.print(" ");
+			}
+
+		}
+	}
+
+		public static void createPieces(char[][] map, ArrayList<Piece> alPieces) {
+		// TODO Auto-generated method stub
+		int xEndLine = 4;
+		int oEndLine = 10;
+		for (int x = 1; x < map.length-2; x += 2) {
+			for (int i = 1; i < xEndLine; i+=2) {
+				alPieces.add(new Piece(x, i, 'O', false));
+				alPieces.add(new Piece(x + 1, i+1, 'O', false));	
+			}
+			for (int i = 7; i < oEndLine; i+=2) {
+				alPieces.add(new Piece(x, i, 'X', false));
+				alPieces.add(new Piece(x + 1, i+1, 'X', false));
+			}
+		}
+	}
+
+	public static void fillTab(char[][] map, ArrayList<Piece> alPieces) {
+		// TODO Auto-generated method stub
+
+		for (int i = 0; i < map.length; i++) {
+
+			for (int j = 0; j < map[i].length; j++) {
+				map[i][j] = '-';
+				map[0][j] = '*';
+				map[map.length - 1][j] = '*';
+			}
+			map[i][0] = '*';
+			map[i][map[i].length - 1] = '*';
+		}
+		for (Piece piece : alPieces) {
+			map[piece.getX()][piece.getY()] = piece.getCouleur();
+		}
+	}
+
 	
 }

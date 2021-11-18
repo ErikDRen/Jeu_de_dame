@@ -2,7 +2,10 @@ package game;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import model.Piece;
 import utile.Utilitaires;
 
@@ -33,32 +36,89 @@ public class Game {
 	public void game() throws IOException {
 		initFile();
 		tabMap = new char[sizeX][sizeY];
-		createPieceO();
-		createPieceX();
+		Utilitaires.createPieces(tabMap, alPieces);
 		do {
-			fillTab(tabMap, alPieces);
-			printTab(tabMap, sizeY, sizeX);
-			playerTurn();
+			Utilitaires.fillTab(tabMap, alPieces);
+			Utilitaires.printTab(tabMap, sizeY, sizeX);
+			Map<Piece, int[]> comestible = new HashMap<Piece, int[]>();
+			comestible = checkIfCanEat(tabMap,alPieces, comestible);
+			playerTurn(comestible);
 			
 			Utilitaires.saveTab(tabMap, fileNameP1,sizeY);
 			Utilitaires.saveTab(tabMap, fileNameP2,sizeY);
 		} while (gameOn);
 	}
 	
-	private void playerTurn(){
+	private Map<Piece, int[]> checkIfCanEat(char[][] tabMap2, ArrayList<Piece> alPieces2, Map<Piece, int[]> comestible) {
+		char color;
+		char enemi;
+		if (player1Turn){
+			color = 'X';
+			enemi = 'O';
+		}else{
+			color = 'O';
+			enemi = 'X';
+		}
+		for (Piece pi : alPieces2) {
+			if (pi.getCouleur() == color){
+				if(tabMap[pi.getX()-1][pi.getY()+1] == enemi){
+					if(tabMap[pi.getX()-2][pi.getY()+2] == '-'){
+						comestible.put(pi, new int[] {1});
+					}
+				}
+				if(tabMap[pi.getX()+1][pi.getY()+1] == enemi){
+					if(tabMap[pi.getX()+2][pi.getY()+2] == '-'){
+						comestible.put(pi, new int[] {3});
+					}
+				}
+				if(tabMap[pi.getX()-1][pi.getY()-1] == enemi){
+					if(tabMap[pi.getX()-2][pi.getY()-2] == '-'){
+						comestible.put(pi, new int[] {7});
+					}
+				}
+				if(tabMap[pi.getX()+1][pi.getY()-1] == enemi){
+					if(tabMap[pi.getX()+2][pi.getY()-2] == '-'){
+						comestible.put(pi, new int[] {9});
+					}
+				}
+			}
+		}
+		return comestible;
+	}
+
+	private void playerTurn(Map<Piece, int[]> comestible){
 		boolean check = false;
 		boolean mooved = false;
 		Piece selectedPiece;
 		do {
-			do{
-				selectedPiece = selectPieceToMove(tabMap, alPieces);
-				check = checkSelectedPiece(selectedPiece);
-			}while(!check);
+
+			if(comestible.isEmpty()){
+				do{
+					selectedPiece = selectPieceToMove(tabMap, alPieces);
+					check = checkSelectedPiece(selectedPiece);
+				}while(!check);
+			}else{
+				do{
+					selectedPiece = selectPieceToMove(tabMap, alPieces);
+					check = checkSelectedPieceInComestible(selectedPiece, comestible);
+				}while(!check);
+			}
+
 			mooved = movePieceSelected(Utilitaires.giveString(), selectedPiece);
 		}while(!mooved);
 		player1Turn = !player1Turn;
 	}
 
+	private boolean checkSelectedPieceInComestible(Piece selectedPiece, Map<Piece, int[]> comestible){
+		for (Piece piece : alPieces) {
+			if(piece == selectedPiece){
+				System.out.println("piece can eat");
+				return true;
+			}
+		}
+		System.out.println("another piece need to eat !");
+		return false;
+	}
 	private boolean checkSelectedPiece(Piece pi){
 		if((!player1Turn && pi.getCouleur() == 'X') || (player1Turn) && pi.getCouleur() == 'O'){
 			System.out.println("it's not the turn of this piece");
@@ -88,85 +148,6 @@ public class Game {
 // Write the date in both players file
 		Utilitaires.newMatch(dateNow,fileNameP1);
 		Utilitaires.newMatch(dateNow,fileNameP2);
-	}
-
-	private void createPieceO() {
-		// TODO Auto-generated method stub
-		// for (int i = 0; i < nbPiecesO;) {
-		for (int x = 1; x < 11; x += 2) {
-			alPieces.add(new Piece(x, 1, 'O', false));
-			alPieces.add(new Piece(x + 1, 2, 'O', false));
-			alPieces.add(new Piece(x, 3, 'O', false));
-			alPieces.add(new Piece(x + 1, 4, 'O', false));
-			// i++;
-		}
-		// }
-	}
-
-	private void createPieceX() {
-		// TODO Auto-generated method stub
-		// for (int i = 0; i < nbPiecesX;) {
-		for (int x = 1; x < 11; x += 2) {
-			alPieces.add(new Piece(x, 7, 'X', false));
-			alPieces.add(new Piece(x + 1, 8, 'X', false));
-			alPieces.add(new Piece(x, 9, 'X', false));
-			alPieces.add(new Piece(x + 1, 10, 'X', false));
-			// i++;
-		}
-		// }
-	}
-
-	private void fillTab(char[][] map, ArrayList<Piece> alPieces) {
-		// TODO Auto-generated method stub
-
-		for (int i = 0; i < map.length; i++) {
-
-			for (int j = 0; j < map[i].length; j++) {
-				map[i][j] = '-';
-				map[0][j] = '*';
-				map[map.length - 1][j] = '*';
-			}
-			map[i][0] = '*';
-			map[i][map[i].length - 1] = '*';
-		}
-		for (Piece piece : alPieces) {
-			map[piece.getX()][piece.getY()] = piece.getCouleur();
-		}
-	}
-
-	// This function will print the board "clear and pretty"
-	public static void printTab(char[][] map, int sizeY, int sizeX) {
-		char c = 'a';
-		System.out.print("  ");
-
-		for (int i = 0; i < map.length; i++) {
-			if (i != 0 && i != sizeY - 1) {
-				System.out.print(c);
-				c++;
-				System.out.print(" ");
-
-			}
-
-			if (i == sizeY - 1) {
-				System.out.print("  ");
-			}
-
-			for (int j = 0; j < map[i].length; j++) {
-				System.out.print(map[j][i]);
-				System.out.print(" ");
-			}
-
-			System.out.println();
-
-		}
-		System.out.print("    ");
-		for (int i = 0; i < sizeX; i++) {
-			if (i != 0 && i != sizeX - 1) {
-				System.out.print(i);
-				System.out.print(" ");
-			}
-
-		}
 	}
 
 	public static Piece selectPieceToMove(char[][] map, ArrayList<Piece> alPieces) {
