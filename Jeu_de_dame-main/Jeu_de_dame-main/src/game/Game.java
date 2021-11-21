@@ -18,14 +18,16 @@ public class Game {
 	String fileNameP2 = "";
 
 	boolean player1Turn = true;
-	int nbPiecesO = 20;
-	int nbPiecesX = 20;
+
 	int sizeX = 12;
 	int sizeY = 12;
 	char[][] tabMap;
 	// final static String FILENAME = "./history.txt";
 	boolean gameOn = true;
 	ArrayList<Piece> alPieces = new ArrayList<Piece>();
+	
+	//List for kings
+	ArrayList<Piece> alKings = new ArrayList<Piece>();
 
 	public Game(String p1, String p2) {
 		super();
@@ -53,31 +55,35 @@ public class Game {
 			Map<Piece, int[]> comestible) {
 		char color;
 		char enemi;
+		char kingEnemi;
+		
 		if (player1Turn) {
 			color = 'X';
-			enemi = 'O';
+			enemi = 'O';			
+			kingEnemi =  '@';
 		} else {
 			color = 'O';
 			enemi = 'X';
+			kingEnemi = '#';
 		}
 		for (Piece pi : alPieces2) {
 			if (pi.getCouleur() == color) {
-				if (tabMap[pi.getX() - 1][pi.getY() + 1] == enemi) {
+				if (tabMap[pi.getX() - 1][pi.getY() + 1] == enemi || tabMap[pi.getX() - 1][pi.getY() + 1] == kingEnemi) {
 					if (tabMap[pi.getX() - 2][pi.getY() + 2] == '-') {
 						comestible.put(pi, new int[] { 1 });
 					}
 				}
-				if (tabMap[pi.getX() + 1][pi.getY() + 1] == enemi) {
+				if (tabMap[pi.getX() + 1][pi.getY() + 1] == enemi || tabMap[pi.getX() + 1][pi.getY() + 1] == kingEnemi) {
 					if (tabMap[pi.getX() + 2][pi.getY() + 2] == '-') {
 						comestible.put(pi, new int[] { 3 });
 					}
 				}
-				if (tabMap[pi.getX() - 1][pi.getY() - 1] == enemi) {
+				if (tabMap[pi.getX() - 1][pi.getY() - 1] == enemi || tabMap[pi.getX() - 1][pi.getY() - 1] == kingEnemi) {
 					if (tabMap[pi.getX() - 2][pi.getY() - 2] == '-') {
 						comestible.put(pi, new int[] { 7 });
 					}
 				}
-				if (tabMap[pi.getX() + 1][pi.getY() - 1] == enemi) {
+				if (tabMap[pi.getX() + 1][pi.getY() - 1] == enemi || tabMap[pi.getX() + 1][pi.getY() - 1] == kingEnemi) {
 					if (tabMap[pi.getX() + 2][pi.getY() - 2] == '-') {
 						comestible.put(pi, new int[] { 9 });
 					}
@@ -92,13 +98,17 @@ public class Game {
 		boolean mooved = false;
 		Piece selectedPiece;
 		do {
-
 			if (comestible.isEmpty()) {
 				do {
 					selectedPiece = selectPieceToMove(tabMap, alPieces);
 					check = checkSelectedPiece(selectedPiece);
 				} while (!check);
-				mooved = movePieceSelected(Utilitaires.giveString(), selectedPiece);
+				if (selectedPiece.getCouleur() == '@') {
+					mooved = moveKingSelected(Utilitaires.giveString(), selectedPiece);
+				} else {
+					mooved = movePieceSelected(Utilitaires.giveString(), selectedPiece);
+				}
+				
 			} else {
 				do {
 					selectedPiece = selectPieceToMove(tabMap, alPieces);
@@ -139,7 +149,7 @@ public class Game {
 	}
 
 	private boolean checkSelectedPiece(Piece pi) {
-		if ((!player1Turn && pi.getCouleur() == 'X') || (player1Turn) && pi.getCouleur() == 'O') {
+		if ((!player1Turn && (pi.getCouleur() == 'X' || pi.getCouleur() == '#') || (player1Turn) && (pi.getCouleur() == 'O' || pi.getCouleur() == '@'))) {
 			System.out.println("it's not the turn of this piece");
 			return false;
 		}
@@ -186,7 +196,7 @@ public class Game {
 							return piece;
 						}
 					}
-				}
+				}	
 			}
 		} while (selecting);
 		return null;
@@ -207,6 +217,12 @@ public class Game {
 				alPieces.remove(indexToRemove);
 				piece.setX(x - 2);
 				piece.setY(y + 2);
+				
+				
+				
+				
+				
+				
 				tabMap[piece.getX()][piece.getY()] = piece.getCouleur();
 				System.out.println(piece.getX() + " " + piece.getY());
 				return true;
@@ -267,8 +283,15 @@ public class Game {
 		case "1":
 			if (piece.getCouleur() == 'O' && tabMap[piece.getX() - 1][piece.getY() + 1] == '-') {
 				tabMap[piece.getX()][piece.getY()] = '-';
+				
 				piece.setX(piece.getX() - 1);
 				piece.setY(piece.getY() + 1);
+				if(piece.getCouleur()== 'O' && piece.getY() == 5) {
+					System.out.print("One of your piece became a king.");
+					becomeKings(piece);
+				}
+				
+				
 				tabMap[piece.getX()][piece.getY()] = piece.getCouleur();
 				return true;
 			} else {
@@ -279,6 +302,13 @@ public class Game {
 				tabMap[piece.getX()][piece.getY()] = '-';
 				piece.setX(piece.getX() + 1);
 				piece.setY(piece.getY() + 1);
+				
+				if(piece.getCouleur()== 'O' && piece.getY() == 5) {
+					System.out.print("Une pion devient dame.");
+					becomeKings(piece);
+				}
+				
+
 				tabMap[piece.getX()][piece.getY()] = piece.getCouleur();
 				return true;
 			} else {
@@ -310,5 +340,162 @@ public class Game {
 			return false;
 		}
 	}
+	//distance trop grande pas bien.
+	public boolean moveKingSelected(String move, Piece piece) {
+		
+		int nbMove = 0;
+		boolean cantMove = false;
+		switch (move) {
+		case "1":
+			
 
+			System.out.println("How many times do you want to go in this way?");
+			nbMove = Utilitaires.giveInt();
+
+
+			if ((piece.getX() - nbMove) > 0 && (piece.getY() + nbMove) <= 10){
+
+				for (int i = 1; i<= nbMove; i++) {
+
+					if (tabMap[piece.getX() - i][piece.getY() + i] != '-' ) {
+						cantMove = true;
+	
+					}
+				}
+				
+				if ( cantMove == true) {
+					System.out.println("Bad range, insert another one.");
+					return false;
+				} else {
+					piece.setX(piece.getX() - nbMove);
+					piece.setY(piece.getY() + nbMove);
+					tabMap[piece.getX()][piece.getY()] = piece.getCouleur();
+					return true;
+				}
+
+			}else {
+				System.out.println("Trop grand connard.");
+				return false;
+			}
+
+			
+		
+		case "3":
+
+			System.out.println("How many times do you want to go in this way?");
+			nbMove = Utilitaires.giveInt();
+
+			if ((piece.getX() + nbMove) <= 10 && (piece.getY() + nbMove) <= 10){
+			
+				for (int i = 1; i<= nbMove; i++) {
+
+					if (tabMap[piece.getX() + i][piece.getY() + i] != '-') {
+						cantMove = true;
+		
+					}
+				}
+				
+				if ( cantMove == true) {
+					System.out.println("Bad range, insert another one.");
+					return false;
+				} else {
+					piece.setX(piece.getX() + nbMove);
+					piece.setY(piece.getY() + nbMove);
+					tabMap[piece.getX()][piece.getY()] = piece.getCouleur();
+					return true;
+				}
+
+			}else {
+				System.out.println("Trop grand connard.");
+				return false;
+			}
+			
+			
+		//break;	
+	
+		case "7":
+			System.out.println("How many times do you want to go in this way?");
+			nbMove = Utilitaires.giveInt();
+
+			if ((piece.getX() - nbMove) > 0 && (piece.getY() - nbMove) > 0){
+
+				for (int i = 1; i<= nbMove; i++) {
+					if (tabMap[piece.getX() - i][piece.getY() - i] != '-') {
+						cantMove = true;
+
+					}
+				}
+				
+				if ( cantMove == true) {
+					System.out.println("Bad range, insert another one.");
+					return false;
+				} else {
+					piece.setX(piece.getX() - nbMove);
+					piece.setY(piece.getY() - nbMove);
+					tabMap[piece.getX()][piece.getY()] = piece.getCouleur();
+					return true;
+				}
+			}else {
+				System.out.println("Trop grand connard.");
+				return false;
+			}
+
+		//break;		
+			
+
+		case "9":
+			
+			System.out.println("How many times do you want to go in this way?");
+			nbMove = Utilitaires.giveInt();
+
+			if ((piece.getX() + nbMove) <= 10 && (piece.getY() - nbMove) > 0){
+				
+				for (int i = 1; i<= nbMove ; i++) {
+
+					if (tabMap[piece.getX() + i][piece.getY() - i] != '-') {
+						cantMove = true;
+						
+					}
+				}
+				
+				if ( cantMove == true) {
+					System.out.println("Bad range, insert another one.");
+					return false;
+				} else {
+					piece.setX(piece.getX() + nbMove);
+					piece.setY(piece.getY() - nbMove);
+					tabMap[piece.getX()][piece.getY()] = piece.getCouleur();
+					return true;
+				}
+			}
+			else {
+				System.out.println("Trop grand connard.");
+				return false;
+			}
+
+		//break;	
+
+		default:
+			System.out.println("default error");
+			return false;
+		}
+	}
+	
+	
+	
+	
+	
+	
+
+	private void becomeKings(Piece piece) {
+		if (piece.getCouleur() == 'O') {
+		piece.setCouleur('@');
+		tabMap[piece.getX()][piece.getY()] = '@';
+		}
+		
+		
+	
+	
+
+}
 }
