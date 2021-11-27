@@ -176,12 +176,12 @@ public class Utilitaires {
 		int oEndLine = 10;
 		for (int x = 1; x < /*map.length-2*/ 2; x += 2) {
 			for (int i = 1; i < xEndLine; i+=2) {
-				alPieces.add(new Piece(x, i, 'O', false));
-				alPieces.add(new Piece(x + 1, i+1, 'O', false));	
+				alPieces.add(new Piece(x, i, 'O', '@',false));
+				alPieces.add(new Piece(x + 1, i+1, 'O', '@', false));	
 			}
 			for (int i = 7; i < oEndLine; i+=2) {
-				alPieces.add(new Piece(x, i, 'X', false));
-				alPieces.add(new Piece(x + 1, i+1, 'X', false));
+				alPieces.add(new Piece(x, i, 'X',  '#',false));
+				alPieces.add(new Piece(x + 1, i+1, 'X',  '#',false));
 			}
 		}
 	}
