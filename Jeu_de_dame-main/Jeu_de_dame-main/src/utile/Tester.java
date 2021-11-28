@@ -24,7 +24,7 @@ public class Tester {
 	        put("j", "10");
 	    }};
 
-		System.out.println(Utilitaires.convertAJToNumber("j2"));
+		System.out.println(Utilitaires.convertAJToStringNumber("j2"));
     
 	}
 }

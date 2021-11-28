@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Scanner;
 
+import game.Coordonee;
 import model.Piece;
 
 import java.text.SimpleDateFormat;
@@ -19,20 +20,6 @@ import java.util.ArrayList;
 
 public class Utilitaires {
 	
-	//Map for coordinates
-    static Map<String, String> myMap = new HashMap<String, String>() {{
-        put("a", "1");
-        put("b", "2");
-        put("c", "3");
-        put("d", "4");
-        put("e", "5");
-        put("f", "6");
-        put("g", "7");
-        put("h", "8");
-        put("i", "9");
-        put("j", "10");
-    }};
-    
    
 	public static String giveString() {
 		Scanner sc = new Scanner(System.in);
@@ -42,18 +29,79 @@ public class Utilitaires {
 	
 	
 	public static int giveInt() {
+		/*Coordonee co = new Coordonee(3,7);
+		Coordonee validPos = convertStringNumberToCoordonee("3,7");
+		System.out.println(co.getX() == validPos.getX() && co.getY() == validPos.getY());*/
 		Scanner sc = new Scanner(System.in);
 		int num = sc.nextInt();
 		return num;
 	}
 	
+	//Map for coordinates
+	static Map<String, String> AJMapToStringNumber = new HashMap<String, String>() {{
+		put("a", "1");
+		put("b", "2");
+		put("c", "3");
+		put("d", "4");
+		put("e", "5");
+		put("f", "6");
+		put("g", "7");
+		put("h", "8");
+		put("i", "9");
+		put("j", "10");
+	}};
+	static Map<String, String> StringNumberMapToAJ = new HashMap<String, String>() {{
+		put("1", "a");
+		put("2", "b");
+		put("3", "c");
+		put("4", "d");
+		put("5", "e");
+		put("6", "f");
+		put("7", "g");
+		put("8", "h");
+		put("9", "i");
+		put("10", "j");
+	}};
+	
+	
+	public static Coordonee convertStringNumberToCoordonee(String reponse) {
+		String[] parts = reponse.split(",");
+		
+		if(parts.length != 2) {
+			System.out.println("WHattataataa");
+			return null;
+			
+		}
+		Coordonee coordonee = new Coordonee(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
+		System.out.println(coordonee);
+		return coordonee;
+	}
+	
+
+	public static String convertCoordoneeToAJ(Coordonee co) {
+		String X = co.getStringX();
+		String Y = co.getStringY();
+		return StringNumberMapToAJ.get(Y)+X;
+	}
+	
+	
 	public static boolean isACorrectPosition(String s) {
 		return s.matches("[a-j]+([1-9]|10)");
 	}
+	
+	
+	public static List<String> convertAJToStringNumber(String selectedXY) {
+		List<String> res = null;
+		String AJ = AJMapToStringNumber.get(String.valueOf(selectedXY.charAt(0)));
+		if(selectedXY.length() == 3) {
+			String numberPart = String.valueOf(selectedXY.charAt(1)) + String.valueOf(selectedXY.charAt(2));
+			res = Arrays.asList(AJ,numberPart );
 
-	public static List<String> convertAJToNumber(String selectedXY) {
-		String AJ = myMap.get(String.valueOf(selectedXY.charAt(0)));
-		List<String> res = Arrays.asList(AJ,String.valueOf(selectedXY.charAt(1)) );
+		}else {
+			res = Arrays.asList(AJ,String.valueOf(selectedXY.charAt(1)) );
+			
+		}
+		System.out.println(res);
 		return res;
 	}
 	
@@ -91,8 +139,6 @@ public class Utilitaires {
 	    writer.close();
 	}
 	
-	
-	
 	//And put it in a directory which is the player's name
 	public static void createFolderForUser(String playerName) throws IOException {
 		
@@ -102,9 +148,6 @@ public class Utilitaires {
 	    Files.createDirectories(path);
 		
 	}
-	
-	
-
 
 	//This function will give the date
 	public static String giveDate() {
@@ -203,6 +246,8 @@ public class Utilitaires {
 			map[piece.getX()][piece.getY()] = piece.getCouleur();
 		}
 	}
+
+
 
 	
 }

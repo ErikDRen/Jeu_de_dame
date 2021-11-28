@@ -1,8 +1,11 @@
 package model;
 
+import game.Coordonee;
+
 public class Piece {
 	
 	int x, y;
+	Coordonee coordoneeXY; // Va falloir remplacé tout les setX et setY par des setCoordoneeXY
 	char couleur;
 	char kingColor;
 	public char getKingColor() {
@@ -29,6 +32,12 @@ public class Piece {
 	}
 	public void setCouleur(char couleur) {
 		this.couleur = couleur;
+	}
+	public Coordonee getCoordoneeXY() {
+		return coordoneeXY;
+	}
+	public void setCoordoneeXY(Coordonee coordoneeXY) {
+		this.coordoneeXY = coordoneeXY;
 	}
 	public boolean isGoBack() {
 		return goBack;
