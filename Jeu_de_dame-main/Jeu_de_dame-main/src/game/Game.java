@@ -58,6 +58,11 @@ public class Game {
 		Piece selectedPiece;
 		do {
 			if (comestible.isEmpty()) {
+				if(!checkIfPlayerCanMove()) {
+					System.out.println("/!\\ Vous ne pouvez pas jouer, votre tour est pass� /!\\");
+					player1Turn = !player1Turn;
+					return;
+				}
 				do {
 					selectedPiece = selectPieceToMove(board, alPieces);
 					check = checkSelectedPiece(selectedPiece);
@@ -97,6 +102,19 @@ public class Game {
 			becomeKings(selectedPiece);
 		}
 		player1Turn = !player1Turn;
+	}
+
+	private boolean checkIfPlayerCanMove() {
+		char color = player1Turn ? 'X' : 'O';
+		char kingColor = player1Turn ? '#' : '@';
+		for(Piece p : alPieces) {
+			if (p.getCouleur() == color || p.getCouleur() == kingColor) {
+				if(checkIfPieceCanMove(p)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	private boolean mooveToEat(Piece selectedPiece, Map<Piece, int[]> comestible) {
@@ -796,6 +814,14 @@ public class Game {
 			System.out.println("it's not the turn of this piece");
 			return false;
 		}
+		if(!checkIfPieceCanMove(pi)) {
+			return false;
+		}
+		System.out.println("piece in " + pi.getX() + ", " + pi.getY() + " selected !");
+		return true;
+	}
+
+	private boolean checkIfPieceCanMove(Piece pi) {
 		// Check if piece can move in 1 3 7 9 direction
 		if ((pi.getCouleur() == 'O' && board[pi.getX() - 1][pi.getY() + 1] != '-' && // check for direction 1
 				board[pi.getX() + 1][pi.getY() + 1] != '-') || // check for direction 3
@@ -804,7 +830,6 @@ public class Game {
 			System.out.println("Can't move this piece");
 			return false;
 		}
-		System.out.println("piece in " + pi.getX() + ", " + pi.getY() + " selected !");
 		return true;
 	}
 }
