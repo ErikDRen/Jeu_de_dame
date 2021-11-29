@@ -68,7 +68,6 @@ public class Utilitaires {
 		String[] parts = reponse.split(",");
 		
 		if(parts.length != 2) {
-			System.out.println("WHattataataa");
 			return null;
 			
 		}
@@ -217,7 +216,7 @@ public class Utilitaires {
 		// TODO Auto-generated method stub
 		int xEndLine = 4;
 		int oEndLine = 10;
-		for (int x = 1; x < /*map.length-2*/ 2; x += 2) {
+		for (int x = 1; x < map.length-2 /*2*/; x += 2) {
 			for (int i = 1; i < xEndLine; i+=2) {
 				alPieces.add(new Piece(x, i, 'O', '@',false));
 				alPieces.add(new Piece(x + 1, i+1, 'O', '@', false));	

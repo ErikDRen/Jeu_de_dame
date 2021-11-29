@@ -88,6 +88,14 @@ public class Game {
 			}
 
 		} while (!mooved);
+		if (selectedPiece.getCouleur() == 'O' && selectedPiece.getY() == 10) {
+			System.out.print("One of your piece became a king.");
+			becomeKings(selectedPiece);
+		}
+		if (selectedPiece.getCouleur() == 'X' && selectedPiece.getY() == 1) {
+			System.out.print("One of your piece became a king.");
+			becomeKings(selectedPiece);
+		}
 		player1Turn = !player1Turn;
 	}
 
@@ -114,7 +122,7 @@ public class Game {
 	/*
 	check toute la colonne de la direction
 	si tu trouve une piece suivie de '-' avec tabmap 
-	ListMovePossible add coordonné de '-'
+	ListMovePossible add coordonnï¿½ de '-'
 	si tu trouve un * tu arrete la boucle
 	
 	ensuite on retire toute les piece Mangeable
@@ -138,13 +146,13 @@ public class Game {
 		
 		case 1:
 			// On cherche les position de kill existante dans la diagonale
-			//On ira ensuite ce déplacé a ce point et tuer tout enemi sur le trajet !
+			//On ira ensuite ce dï¿½placï¿½ a ce point et tuer tout enemi sur le trajet !
 			int i = 0;
 			List<Coordonee> ListPositionValide = new ArrayList<Coordonee>(); // position de kill valide
 			do {
 				// check pion ennemi suivie de '-' (position de kill valide)
-				if(board[selectedPiece.getX() - i][selectedPiece.getY() + i] == enemi ||
-						board[selectedPiece.getX() - i][selectedPiece.getY() + i] == kingEnemi &&
+				if((board[selectedPiece.getX() - i][selectedPiece.getY() + i] == enemi ||
+						board[selectedPiece.getX() - i][selectedPiece.getY() + i] == kingEnemi) &&
 						board[selectedPiece.getX() - i -1][selectedPiece.getY() + i +1] == '-') {
 					ListPositionValide.add(new Coordonee(selectedPiece.getX() - i -1, selectedPiece.getY() + i +1));
 				}
@@ -214,8 +222,8 @@ public class Game {
 			ListPositionValide = new ArrayList<Coordonee>(); // position de kill valide
 			do {
 				// check pion ennemi suivie de '-' (position de kill valide)
-				if(board[selectedPiece.getX() + i][selectedPiece.getY() + i] == enemi ||
-						board[selectedPiece.getX() + i][selectedPiece.getY() + i] == kingEnemi &&
+				if((board[selectedPiece.getX() + i][selectedPiece.getY() + i] == enemi ||
+						board[selectedPiece.getX() + i][selectedPiece.getY() + i] == kingEnemi) &&
 						board[selectedPiece.getX() + i +1][selectedPiece.getY() + i +1] == '-') {
 					ListPositionValide.add(new Coordonee(selectedPiece.getX() + i +1, selectedPiece.getY() + i +1));
 				}
@@ -264,8 +272,8 @@ public class Game {
 			ListPositionValide = new ArrayList<Coordonee>(); // position de kill valide
 			do {
 				// check pion ennemi suivie de '-' (position de kill valide)
-				if(board[selectedPiece.getX() - i][selectedPiece.getY() - i] == enemi ||
-						board[selectedPiece.getX() - i][selectedPiece.getY() - i] == kingEnemi &&
+				if((board[selectedPiece.getX() - i][selectedPiece.getY() - i] == enemi ||
+						board[selectedPiece.getX() - i][selectedPiece.getY() - i] == kingEnemi) &&
 						board[selectedPiece.getX() - i -1][selectedPiece.getY() - i -1] == '-') {
 					ListPositionValide.add(new Coordonee(selectedPiece.getX() - i -1, selectedPiece.getY() - i -1));
 				}
@@ -280,24 +288,26 @@ public class Game {
 			
 			reponse = Utilitaires.giveString();
 			validPos = Utilitaires.convertStringNumberToCoordonee(reponse);
-			if(ListPositionValide.contains(validPos)) {
-				Piece p;
-				i = selectedPiece.getX();
-				int j = selectedPiece.getY();
-				
-				while(i != validPos.getX() && j != validPos.getY()) {
-					p = findPiece(i,j);
-					if(p != null && p.getCouleur() != selectedPiece.getCouleur()) {
-						board[p.getX()][p.getY()] = '-';
-						alPieces.remove(p);
+			for(Coordonee co : ListPositionValide) {
+				if(co.getX() == validPos.getX() && co.getY() == validPos.getY()) { // if(ListPositionValide.contains(validPos)) {
+					Piece p;
+					i = selectedPiece.getX();
+					int j = selectedPiece.getY();
+					
+					while(i != validPos.getX() && j != validPos.getY()) {
+						p = findPiece(i,j);
+						if(p != null && p.getCouleur() != selectedPiece.getCouleur()) {
+							board[p.getX()][p.getY()] = '-';
+							alPieces.remove(p);
+						}
+						i--;
+						j--;
 					}
-					i--;
-					j--;
+					board[selectedPiece.getX()][selectedPiece.getY()] = '-';
+					selectedPiece.setX(validPos.getX());
+					selectedPiece.setY(validPos.getY());
+					board[selectedPiece.getX()][selectedPiece.getY()] = selectedPiece.getCouleur();
 				}
-				board[selectedPiece.getX()][selectedPiece.getY()] = '-';
-				selectedPiece.setX(validPos.getX());
-				selectedPiece.setY(validPos.getY());
-				board[selectedPiece.getX()][selectedPiece.getY()] = selectedPiece.getCouleur();
 			}
 			/*
 			if (board[selectedPiece.getX() - 1][selectedPiece.getY() - 1] == '-') {
@@ -313,8 +323,8 @@ public class Game {
 			ListPositionValide = new ArrayList<Coordonee>(); // position de kill valide
 			do {
 				// check pion ennemi suivie de '-' (position de kill valide)
-				if(board[selectedPiece.getX() + i][selectedPiece.getY() - i] == enemi ||
-						board[selectedPiece.getX() + i][selectedPiece.getY() - i] == kingEnemi &&
+				if((board[selectedPiece.getX() + i][selectedPiece.getY() - i] == enemi ||
+						board[selectedPiece.getX() + i][selectedPiece.getY() - i] == kingEnemi) &&
 						board[selectedPiece.getX() + i +1][selectedPiece.getY() - i -1] == '-') {
 					ListPositionValide.add(new Coordonee(selectedPiece.getX() + i +1, selectedPiece.getY() - i -1));
 				}
@@ -329,24 +339,26 @@ public class Game {
 			
 			reponse = Utilitaires.giveString();
 			validPos = Utilitaires.convertStringNumberToCoordonee(reponse);
-			if(ListPositionValide.contains(validPos)) {
-				Piece p;
-				i = selectedPiece.getX();
-				int j = selectedPiece.getY();
-				
-				while(i != validPos.getX() && j != validPos.getY()) {
-					p = findPiece(i,j);
-					if(p != null && p.getCouleur() != selectedPiece.getCouleur()) {
-						board[p.getX()][p.getY()] = '-';
-						alPieces.remove(p);
+			for(Coordonee co : ListPositionValide) {
+				if(co.getX() == validPos.getX() && co.getY() == validPos.getY()) { // if(ListPositionValide.contains(validPos)) {
+					Piece p;
+					i = selectedPiece.getX();
+					int j = selectedPiece.getY();
+					
+					while(i != validPos.getX() && j != validPos.getY()) {
+						p = findPiece(i,j);
+						if(p != null && p.getCouleur() != selectedPiece.getCouleur()) {
+							board[p.getX()][p.getY()] = '-';
+							alPieces.remove(p);
+						}
+						i++;
+						j--;
 					}
-					i--;
-					j++;
+					board[selectedPiece.getX()][selectedPiece.getY()] = '-';
+					selectedPiece.setX(validPos.getX());
+					selectedPiece.setY(validPos.getY());
+					board[selectedPiece.getX()][selectedPiece.getY()] = selectedPiece.getCouleur();
 				}
-				board[selectedPiece.getX()][selectedPiece.getY()] = '-';
-				selectedPiece.setX(validPos.getX());
-				selectedPiece.setY(validPos.getY());
-				board[selectedPiece.getX()][selectedPiece.getY()] = selectedPiece.getCouleur();
 			}
 			/*
 			if (board[selectedPiece.getX() + 1][selectedPiece.getY() - 1] == '-') {
@@ -488,7 +500,7 @@ public class Game {
 				board[piece.getX()][piece.getY()] = '-';
 				piece.setX(piece.getX() - 1);
 				piece.setY(piece.getY() + 1);
-				if (piece.getCouleur() == 'O' && piece.getY() == 5) {
+				if (piece.getCouleur() == 'O' && piece.getY() == 10) {
 					System.out.print("One of your piece became a king.");
 					becomeKings(piece);
 				}
@@ -502,7 +514,7 @@ public class Game {
 				board[piece.getX()][piece.getY()] = '-';
 				piece.setX(piece.getX() + 1);
 				piece.setY(piece.getY() + 1);
-				if (piece.getCouleur() == 'O' && piece.getY() == 5) {
+				if (piece.getCouleur() == 'O' && piece.getY() == 10) {
 					System.out.print("Une pion devient dame.");
 					becomeKings(piece);
 				}
@@ -516,7 +528,7 @@ public class Game {
 				board[piece.getX()][piece.getY()] = '-';
 				piece.setX(piece.getX() - 1);
 				piece.setY(piece.getY() - 1);
-				if (piece.getCouleur() == 'X' && piece.getY() == 5) {
+				if (piece.getCouleur() == 'X' && piece.getY() == 1) {
 					System.out.print("One of your piece became a king.");
 					becomeKings(piece);
 				}
@@ -531,7 +543,7 @@ public class Game {
 				piece.setX(piece.getX() + 1);
 				piece.setY(piece.getY() - 1);
 
-				if (piece.getCouleur() == 'X' && piece.getY() == 5) {
+				if (piece.getCouleur() == 'X' && piece.getY() == 1) {
 					System.out.print("One of your piece became a king.");
 					becomeKings(piece);
 				}
