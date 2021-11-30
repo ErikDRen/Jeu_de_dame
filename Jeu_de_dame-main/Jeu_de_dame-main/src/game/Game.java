@@ -206,7 +206,7 @@ public class Game {
 						int j = selectedPiece.getY();
 
 						while (i != validPos.getX() && j != validPos.getY()) {
-							p = findPiece(i, j);
+							p = findPiece(i, j,d);
 							if (p != null && p.getColor() != selectedPiece.getColor()) {
 								d.getBoard()[p.getX()][p.getY()] = '-';
 								d.getAlPieces().remove(p);
@@ -226,7 +226,7 @@ public class Game {
 					int j = selectedPiece.getY();
 
 					while (i != validPos.getX() && j != validPos.getY()) {
-						p = findPiece(i, j);
+						p = findPiece(i, j,d);
 						if (p != null && p.getColor() != selectedPiece.getColor()) {
 							d.getBoard()[p.getX()][p.getY()] = '-';
 							d.getAlPieces().remove(p);
@@ -270,7 +270,7 @@ public class Game {
 						int j = selectedPiece.getY();
 
 						while (i != validPos.getX() && j != validPos.getY()) {
-							p = findPiece(i, j);
+							p = findPiece(i, j,d);
 							if (p != null && p.getColor() != selectedPiece.getColor()) {
 								d.getBoard()[p.getX()][p.getY()] = '-';
 								d.getAlPieces().remove(p);
@@ -314,7 +314,7 @@ public class Game {
 						int j = selectedPiece.getY();
 
 						while (i != validPos.getX() && j != validPos.getY()) {
-							p = findPiece(i, j);
+							p = findPiece(i, j,d);
 							if (p != null && p.getColor() != selectedPiece.getColor()) {
 								d.getBoard()[p.getX()][p.getY()] = '-';
 								d.getAlPieces().remove(p);
@@ -358,7 +358,7 @@ public class Game {
 						int j = selectedPiece.getY();
 
 						while (i != validPos.getX() && j != validPos.getY()) {
-							p = findPiece(i, j);
+							p = findPiece(i, j,d);
 							if (p != null && p.getColor() != selectedPiece.getColor()) {
 								d.getBoard()[p.getX()][p.getY()] = '-';
 								d.getAlPieces().remove(p);
@@ -439,7 +439,7 @@ public class Game {
  * @param y
  * @return
  */
-	public Piece findPiece(int x, int y) {
+	public static Piece findPiece(int x, int y,Data d) {
 		for (Piece piece : d.getAlPieces()) {
 			if (x == piece.getX()
 					&& y == piece.getY()) {
