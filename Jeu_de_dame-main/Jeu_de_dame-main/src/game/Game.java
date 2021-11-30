@@ -41,8 +41,8 @@ public class Game {
 			Utilitaires.fillTab(d.getBoard(), d.getAlPieces());
 			Utilitaires.printTab(d.getBoard(), d.getSizeX(), d.getSizeY());
 			Map<Piece, int[]> comestible = new HashMap<Piece, int[]>();
-			comestible = checkIfCanEat(comestible);
-			comestible = checkIfKingCanEat(d.getBoard(), d.getAlPieces(), comestible);
+			comestible = Check.checkIfCanEat(comestible, d);
+			comestible = Check.checkIfKingCanEat(d, comestible);
 			playerTurn(comestible);
 
 			Utilitaires.saveTab(d.getBoard(), d.getFileNameP1(), d.getSizeY());
@@ -94,19 +94,19 @@ public class Game {
 						} // else ?
 						mooved = mooveToEat(selectedPiece, comestible);
 						comestible.clear();
-						comestible = checkIfCanEat(comestible);
-						comestible = checkIfKingCanEat(d.getBoard(), d.getAlPieces(), comestible);
+						comestible = Check.checkIfCanEat(comestible, d);
+						comestible = Check.checkIfKingCanEat(d, comestible);
 	
 					} while (c.checkSelectedPieceInComestible(selectedPiece, comestible));
 				}
 			} while (!mooved);
 			if (selectedPiece.getColor() == d.getColorPlayer2() && selectedPiece.getY() == 10) {
 				System.out.print("One of your piece became a king.");
-				becomeKings(selectedPiece);
+				becomeKings(selectedPiece,d);
 			}
 			if (selectedPiece.getColor() == d.getColorPlayer1() && selectedPiece.getY() == 1) {
 				System.out.print("One of your piece became a king.");
-				becomeKings(selectedPiece);
+				becomeKings(selectedPiece,d);
 			}
 			d.setPlayer1Turn(!d.isPlayer1Turn());
 		}
@@ -115,8 +115,8 @@ public class Game {
 
 	private boolean checkIfStillHavePieces() {
 		for(Piece p : d.getAlPieces()) {
-			if(p.getColor())
-		}
+			//if(p.getColor())
+		} 
 		return false;
 	}
 	
@@ -544,7 +544,7 @@ public class Game {
 					piece.setY(piece.getY() + 1);
 					if (piece.getColor() == d.getColorPlayer2() && piece.getY() == 10) {
 						System.out.print("One of your piece became a king.");
-						becomeKings(piece);
+						becomeKings(piece,d);
 					}
 					d.getBoard()[piece.getX()][piece.getY()] = piece.getColor();
 					return true;
@@ -558,7 +558,7 @@ public class Game {
 					piece.setY(piece.getY() + 1);
 					if (piece.getColor() == d.getColorPlayer2() && piece.getY() == 10) {
 						System.out.print("One of your piece became a King.");
-						becomeKings(piece);
+						becomeKings(piece,d);
 					}
 					d.getBoard()[piece.getX()][piece.getY()] = piece.getColor();
 					return true;
@@ -572,7 +572,7 @@ public class Game {
 					piece.setY(piece.getY() - 1);
 					if (piece.getColor() == d.getColorPlayer1() && piece.getY() == 1) {
 						System.out.print("One of your piece became a king.");
-						becomeKings(piece);
+						becomeKings(piece,d);
 					}
 					d.getBoard()[piece.getX()][piece.getY()] = piece.getColor();
 					return true;
@@ -587,7 +587,7 @@ public class Game {
 
 					if (piece.getColor() == d.getColorPlayer1() && piece.getY() == 1) {
 						System.out.print("One of your piece became a king.");
-						becomeKings(piece);
+						becomeKings(piece,d);
 					}
 					d.getBoard()[piece.getX()][piece.getY()] = piece.getColor();
 					return true;
@@ -718,120 +718,11 @@ public class Game {
 	/**
 	 * @param piece
 	 */
-	private void becomeKings(Piece piece) {
+	public static void becomeKings(Piece piece,Data d) {
 		piece.setCouleur(piece.getKingColor());
 		d.getBoard()[piece.getX()][piece.getY()] = piece.getColor();
 	}
 
-		//--------------------------------------------------------------------------------------------------------------
+	
 
-	/**
-	 * 
-	 * @param comestible
-	 * @return
-	 */
-	private Map<Piece, int[]> checkIfCanEat(Map<Piece, int[]> comestible) {
-		char color = d.isPlayer1Turn() ? d.getColorPlayer1() : d.getColorPlayer2();
-		char enemi = d.isPlayer1Turn() ? d.getColorPlayer2() : d.getColorPlayer1();
-		char kingEnemi = d.isPlayer1Turn() ? d.getKingColorPlayer2() : d.getKingColorPlayer1();
-		
-		for (Piece pi : d.getAlPieces()) {
-			if (pi.getColor() == color) {
-				if (d.getBoard()[pi.getX() - 1][pi.getY() + 1] == enemi
-						|| d.getBoard()[pi.getX() - 1][pi.getY() + 1] == kingEnemi) {
-					if (d.getBoard()[pi.getX() - 2][pi.getY() + 2] == '-') {
-						comestible.put(pi, new int[] { 1 });
-					}
-				}
-				if (d.getBoard()[pi.getX() + 1][pi.getY() + 1] == enemi
-						|| d.getBoard()[pi.getX() + 1][pi.getY() + 1] == kingEnemi) {
-					if (d.getBoard()[pi.getX() + 2][pi.getY() + 2] == '-') {
-						comestible.put(pi, new int[] { 3 });
-					}
-				}
-				if (d.getBoard()[pi.getX() - 1][pi.getY() - 1] == enemi
-						|| d.getBoard()[pi.getX() - 1][pi.getY() - 1] == kingEnemi) {
-					if (d.getBoard()[pi.getX() - 2][pi.getY() - 2] == '-') {
-						comestible.put(pi, new int[] { 7 });
-					}
-				}
-				if (d.getBoard()[pi.getX() + 1][pi.getY() - 1] == enemi
-						|| d.getBoard()[pi.getX() + 1][pi.getY() - 1] == kingEnemi) {
-					if (d.getBoard()[pi.getX() + 2][pi.getY() - 2] == '-') {
-						comestible.put(pi, new int[] { 9 });
-					}
-				}
-			}
-		}
-		return comestible;
-	}
-
-	//--------------------------------------------------------------------------------------------------------------
-
-	/**
-	 * 
-	 * @param tabMap2
-	 * @param alPieces2
-	 * @param comestible
-	 * @return
-	 */
-	private Map<Piece, int[]> checkIfKingCanEat(char[][] tabMap2, ArrayList<Piece> alPieces2,
-			Map<Piece, int[]> comestible) {
-
-		char kingAlly = d.isPlayer1Turn() ? d.getKingColorPlayer1() : d.getKingColorPlayer2();
-		char enemi = d.isPlayer1Turn() ? d.getColorPlayer2() : d.getColorPlayer1();
-		char kingEnemi = d.isPlayer1Turn() ? d.getKingColorPlayer2() : d.getKingColorPlayer1();
-		
-		for (Piece pi : alPieces2) {
-			int i = 0;
-			if (pi.getColor() == kingAlly) {
-				// 1
-				do {
-					i++;
-					if (d.getBoard()[pi.getX() - i][pi.getY() + i] == enemi
-							|| d.getBoard()[pi.getX() - i][pi.getY() + i] == kingEnemi) {
-						if (d.getBoard()[pi.getX() - i - 1][pi.getY() + i + 1] == '-') {
-							comestible.put(pi, new int[] { 1 });
-						}
-					}
-				} while (d.getBoard()[pi.getX() - i][pi.getY() + i] != '*');
-				i = 0;
-				// 3
-				do {
-					i++;
-					if (d.getBoard()[pi.getX() + i][pi.getY() + i] == enemi
-							|| d.getBoard()[pi.getX() + i][pi.getY() + i] == kingEnemi) {
-						if (d.getBoard()[pi.getX() + i + 1][pi.getY() + i + 1] == '-') {
-							comestible.put(pi, new int[] { 3 });
-						}
-					}
-				} while (d.getBoard()[pi.getX() + i][pi.getY() + i] != '*');
-				i = 0;
-				// 7
-				do {
-					i++;
-					if (d.getBoard()[pi.getX() - i][pi.getY() - i] == enemi
-							|| d.getBoard()[pi.getX() - i][pi.getY() - i] == kingEnemi) {
-
-						if (d.getBoard()[pi.getX() - i - 1][pi.getY() - i - 1] == '-') {
-							comestible.put(pi, new int[] { 7 });
-						}
-					}
-				} while (d.getBoard()[pi.getX() - i][pi.getY() - i] != '*');
-				i = 0;
-				// 9
-				do {
-					i++;
-					if (d.getBoard()[pi.getX() + i][pi.getY() - i] == enemi
-							|| d.getBoard()[pi.getX() + i][pi.getY() - i] == kingEnemi) {
-
-						if (d.getBoard()[pi.getX() + i + 1][pi.getY() - i - 1] == '-') {
-							comestible.put(pi, new int[] { 9 });
-						}
-					}
-				} while (d.getBoard()[pi.getX() + i][pi.getY() - i] != '*');
-			}
-		}
-		return comestible;
-	}
 }
