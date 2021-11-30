@@ -2,10 +2,12 @@ package game;
 
 import java.io.IOException;
 
+import data.Data;
 import utile.Utilitaires;
 
 public class Menu {
 
+	Data d = new Data();
 	public void displayMenu() throws IOException {
 		boolean gameOn = true;
 		System.out.println("!!! WELCOME TO DRAUGHT GAME !!!");
@@ -45,21 +47,31 @@ public class Menu {
 
 	private void startPlayervsPlayerGame() throws IOException {
 		
-		System.out.println("Joueur 1, choisissez un pseudo : ");
+		System.out.println("Player 1, choose a pseudo : ");
 		String player1 = Utilitaires.giveString();
-		System.out.println("Joueur 2, choisissez un pseudo : ");
+		System.out.println(player1 + "Choose a character to represent your pawn : ");
+		String pseudoPlayer1 = Utilitaires.giveString();
+		System.out.println("Player 2, choose a pseudo : ");
 		String player2 = Utilitaires.giveString();
-		Game g = new Game(player1, player2);
+		String pseudoPlayer2;
+		boolean check;
+		do{
+			System.out.println(player2 + "Choose a character to represent your pawn : ");
+			pseudoPlayer2 = Utilitaires.giveString();
+			check = pseudoPlayer1 != pseudoPlayer2;
+			if (!check){
+				System.out.println("you can't choose the same character as player 1, plz retry ...");
+			}
+		}while(!check);
+		
+		d.setColorPlayer1(pseudoPlayer1.charAt(0));
+		d.setColorPlayer2(pseudoPlayer2.charAt(0));
+		
+		Game g = new Game(player1, player2, d);
 		
 		g.game();
 	}
 	
-	private void chooseAPseudo() {
-		String choice = Utilitaires.giveString();
-
-	}
-
-
 	private boolean chooseToContinueMenu() {
 		String choice = Utilitaires.giveString();
 		switch(choice) {

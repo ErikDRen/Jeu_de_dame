@@ -5,9 +5,17 @@ import game.Coordonee;
 public class Piece {
 	
 	int x, y;
-	Coordonee coordoneeXY; // Va falloir remplacé tout les setX et setY par des setCoordoneeXY
+	Coordonee coordoneeXY; // Va falloir remplacï¿½ tout les setX et setY par des setCoordoneeXY
 	char couleur;
 	char kingColor;
+	boolean player1;
+	
+	public boolean getPlayer1() {
+		return player1;
+	}
+	public void setPlayer1(boolean player1) {
+		this.player1 = player1;
+	}
 	public char getKingColor() {
 		return kingColor;
 	}
@@ -27,7 +35,7 @@ public class Piece {
 	public void setY(int y) {
 		this.y = y;
 	}
-	public char getCouleur() {
+	public char getColor() {
 		return couleur;
 	}
 	public void setCouleur(char couleur) {
@@ -45,12 +53,12 @@ public class Piece {
 	public void setGoBack(boolean goBack) {
 		this.goBack = goBack;
 	}
-	public Piece(int x, int y, char couleur, char kingColor, boolean goBack) {
+	public Piece(int x, int y, char couleur, char kingColor, boolean player1) {
 		super();
 		this.x = x;
 		this.y = y;
 		this.couleur = couleur;
-		this.goBack = goBack;
+		this.player1 = player1;
 		this.kingColor = kingColor;
 	}
 	@Override

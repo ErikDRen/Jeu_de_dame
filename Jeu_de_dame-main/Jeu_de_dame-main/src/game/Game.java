@@ -6,117 +6,131 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import utile.Check;
+import data.Data;
 import model.Piece;
 import utile.Utilitaires;
 
 public class Game {
 
-	String player1 = "";
-	String player2 = "";
+	Data d;
+	Check c = new Check();
 
-	String fileNameP1 = "";
-	String fileNameP2 = "";
-
-	boolean player1Turn = true;
-
-	int sizeX = 12;
-	int sizeY = 12;
-	char[][] board;
-	// final static String FILENAME = "./history.txt";
-	boolean gameOn = true;
-	ArrayList<Piece> alPieces = new ArrayList<Piece>();
-
-	// List for kings
-	ArrayList<Piece> alKings = new ArrayList<Piece>();
-
-	public Game(String p1, String p2) {
+	public Game(String p1, String p2, Data d) {
 		super();
-		this.player1 = p1;
-		this.player2 = p2;
+		this.d = d;
+
+		d.setPlayer1(p1);
+		d.setPlayer2(p2);
+
+		d.setKingColorPlayer1('#');
+		d.setKingColorPlayer2('@');
 	}
 
+	//--------------------------------------------------------------------------------------------------------------
+
+	/**
+	 * The game function is the core of the program, it will call functions for the execution of the game.
+	 * @throws IOException redirect error
+	 */
 	public void game() throws IOException {
 		initFile();
-		board = new char[sizeX][sizeY];
-		Utilitaires.createPieces(board, alPieces);
+		d.setBoard(new char[d.getSizeX()][d.getSizeY()]);
+		Utilitaires.createPieces(d);
 		do {
-			Utilitaires.fillTab(board, alPieces);
-			Utilitaires.printTab(board, sizeY, sizeX);
+			Utilitaires.fillTab(d.getBoard(), d.getAlPieces());
+			Utilitaires.printTab(d.getBoard(), d.getSizeX(), d.getSizeY());
 			Map<Piece, int[]> comestible = new HashMap<Piece, int[]>();
 			comestible = checkIfCanEat(comestible);
-			comestible = checkIfKingCanEat(board, alPieces, comestible);
+			comestible = checkIfKingCanEat(d.getBoard(), d.getAlPieces(), comestible);
 			playerTurn(comestible);
 
-			Utilitaires.saveTab(board, fileNameP1, sizeY);
-			Utilitaires.saveTab(board, fileNameP2, sizeY);
-		} while (gameOn);
+			Utilitaires.saveTab(d.getBoard(), d.getFileNameP1(), d.getSizeY());
+			Utilitaires.saveTab(d.getBoard(), d.getFileNameP2(), d.getSizeY());
+		} while (d.isGameOn());
 	}
 
+	//--------------------------------------------------------------------------------------------------------------
+
+	/**
+	 * The turn manager ! 
+	 * manage the mooving and eating part, switch the playerTurn variable at the end
+	 * @param comestible map to get directions where you can eat
+	 */
 	private void playerTurn(Map<Piece, int[]> comestible) {
 		boolean check = false;
 		boolean mooved = false;
 		Piece selectedPiece;
-		do {
-			if (comestible.isEmpty()) {
-				if(!checkIfPlayerCanMove()) {
-					System.out.println("/!\\ Vous ne pouvez pas jouer, votre tour est pass� /!\\");
-					player1Turn = !player1Turn;
-					return;
-				}
-				do {
-					selectedPiece = selectPieceToMove(board, alPieces);
-					check = checkSelectedPiece(selectedPiece);
-				} while (!check);
-				if (selectedPiece.getCouleur() == '@' || selectedPiece.getCouleur() == '#') {
-					mooved = moveKingSelected(Utilitaires.giveString(), selectedPiece);
+		if(checkIfStillHavePieces()){
+			do {
+				if (comestible.isEmpty()) {
+					if (!c.checkIfPlayerCanMove(d)) {
+						System.out.println("/!\\ Vous ne pouvez pas jouer, votre tour est pass� /!\\");
+						d.setPlayer1Turn(!d.isPlayer1Turn());
+						return;
+					}
+					do {
+						selectedPiece = selectPieceToMove(d.getBoard(), d.getAlPieces());
+						check = c.checkSelectedPiece(selectedPiece,d);
+					} while (!check);
+					if (selectedPiece.getColor() == d.getKingColorPlayer2()
+							|| selectedPiece.getColor() == d.getKingColorPlayer1()) {
+						mooved = moveKingSelected(Utilitaires.giveString(), selectedPiece);
+					} else {
+						mooved = movePieceSelected(Utilitaires.giveString(), selectedPiece);
+					}
+	
 				} else {
-					mooved = movePieceSelected(Utilitaires.giveString(), selectedPiece);
+					System.out.println("nop");
+					do {
+						selectedPiece = selectPieceToMove(d.getBoard(), d.getAlPieces());
+						check = c.checkSelectedPieceInComestible(selectedPiece, comestible);
+					} while (!check);
+	
+					do {
+						if (selectedPiece.getColor() == d.getColorPlayer2()
+								|| selectedPiece.getColor() == d.getKingColorPlayer1()) {
+							// mooveKingToEat ??
+						} // else ?
+						mooved = mooveToEat(selectedPiece, comestible);
+						comestible.clear();
+						comestible = checkIfCanEat(comestible);
+						comestible = checkIfKingCanEat(d.getBoard(), d.getAlPieces(), comestible);
+	
+					} while (c.checkSelectedPieceInComestible(selectedPiece, comestible));
 				}
-
-			} else {
-				System.out.println("nop");
-				do {
-					selectedPiece = selectPieceToMove(board, alPieces);
-					check = checkSelectedPieceInComestible(selectedPiece, comestible);
-				} while (!check);
-				
-				do {
-					if (selectedPiece.getCouleur() == '@' || selectedPiece.getCouleur() == '#') {
-						//mooveKingToEat ??
-					} // else ?
-					mooved = mooveToEat(selectedPiece, comestible);
-					comestible.clear();
-					comestible = checkIfCanEat(comestible);
-					comestible = checkIfKingCanEat(board, alPieces, comestible);
-					
-				}while(checkSelectedPieceInComestible(selectedPiece, comestible));
+			} while (!mooved);
+			if (selectedPiece.getColor() == d.getColorPlayer2() && selectedPiece.getY() == 10) {
+				System.out.print("One of your piece became a king.");
+				becomeKings(selectedPiece);
 			}
+			if (selectedPiece.getColor() == d.getColorPlayer1() && selectedPiece.getY() == 1) {
+				System.out.print("One of your piece became a king.");
+				becomeKings(selectedPiece);
+			}
+			d.setPlayer1Turn(!d.isPlayer1Turn());
+		}
 
-		} while (!mooved);
-		if (selectedPiece.getCouleur() == 'O' && selectedPiece.getY() == 10) {
-			System.out.print("One of your piece became a king.");
-			becomeKings(selectedPiece);
-		}
-		if (selectedPiece.getCouleur() == 'X' && selectedPiece.getY() == 1) {
-			System.out.print("One of your piece became a king.");
-			becomeKings(selectedPiece);
-		}
-		player1Turn = !player1Turn;
 	}
 
-	private boolean checkIfPlayerCanMove() {
-		char color = player1Turn ? 'X' : 'O';
-		char kingColor = player1Turn ? '#' : '@';
-		for(Piece p : alPieces) {
-			if (p.getCouleur() == color || p.getCouleur() == kingColor) {
-				if(checkIfPieceCanMove(p)) {
-					return true;
-				}
-			}
+	private boolean checkIfStillHavePieces() {
+		for(Piece p : d.getAlPieces()) {
+			if(p.getColor())
 		}
 		return false;
 	}
+	
+	//--------------------------------------------------------------------------------------------------------------
 
+
+	/**
+	 * if the player can eat, that will force him to choose (or not if there is only one 
+	 * enemy that can be eat) an enemy to eat. There is a condition to call the eat function for
+	 * pawn or the king.
+	 * @param selectedPiece
+	 * @param comestible
+	 * @return
+	 */ 
 	private boolean mooveToEat(Piece selectedPiece, Map<Piece, int[]> comestible) {
 		// TODO Auto-generated method stub
 		List<Integer> tempDir = new ArrayList<Integer>();
@@ -128,290 +142,274 @@ public class Game {
 		System.out.println("?");
 		int rep = Utilitaires.giveInt();
 		if (tempDir.contains(rep)) {
-			if(selectedPiece.getCouleur() == '@' || selectedPiece.getCouleur() == '#') {
+			if (selectedPiece.getColor() == '@' || selectedPiece.getColor() == '#') {
 				moveKingToEat(selectedPiece, comestible, rep);
-			}else {
-				eat(rep, selectedPiece);	
+			} else {
+				eat(rep, selectedPiece);
 			}
 		}
 		return true;
 	}
 
-	/*
-	check toute la colonne de la direction
-	si tu trouve une piece suivie de '-' avec tabmap 
-	ListMovePossible add coordonn� de '-'
-	si tu trouve un * tu arrete la boucle
-	
-	ensuite on retire toute les piece Mangeable
-	*/
+	//--------------------------------------------------------------------------------------------------------------
+
+	/**
+	 * Check all direction where the king could eat,
+	 * if it finds a pawn with '-' backward ,
+	 * if it founds a '*', the loop will stop,
+	 * then we remove all eatable pawns. 
+	 * 
+	 * @param selectedPiece
+	 * @param comestible
+	 * @param rep
+	 * @return
+	 */
 	private boolean moveKingToEat(Piece selectedPiece, Map<Piece, int[]> comestible, int rep) {
-		char kingAlly;
-		char enemi;
-		char kingEnemi;
+		char enemi = d.isPlayer1Turn() ? d.getColorPlayer2() : d.getColorPlayer1();
+		char kingEnemi = d.isPlayer1Turn() ? d.getKingColorPlayer2() : d.getKingColorPlayer1();
 
-		if (player1Turn) {
-			kingAlly = '#';
-			enemi = 'O';
-			kingEnemi = '@';
-		} else {
-			kingAlly = '@';
-			enemi = 'X';
-			kingEnemi = '#';
-		}
-		
 		switch (rep) {
-		
-		case 1:
-			// On cherche les position de kill existante dans la diagonale
-			//On ira ensuite ce d�plac� a ce point et tuer tout enemi sur le trajet !
-			int i = 0;
-			List<Coordonee> ListPositionValide = new ArrayList<Coordonee>(); // position de kill valide
-			do {
-				// check pion ennemi suivie de '-' (position de kill valide)
-				if((board[selectedPiece.getX() - i][selectedPiece.getY() + i] == enemi ||
-						board[selectedPiece.getX() - i][selectedPiece.getY() + i] == kingEnemi) &&
-						board[selectedPiece.getX() - i -1][selectedPiece.getY() + i +1] == '-') {
-					ListPositionValide.add(new Coordonee(selectedPiece.getX() - i -1, selectedPiece.getY() + i +1));
-				}
-				i++;
-			}while(board[selectedPiece.getX() - i-1][selectedPiece.getY() + i+1] != '*');
-			
-			System.out.print("Where do you want to go ? : ");
-			for (Coordonee mv : ListPositionValide) {
-				System.out.print(mv + " ");
-			}
-			System.out.println("?");
-			
-			String reponse = Utilitaires.giveString();
-			Coordonee validPos = Utilitaires.convertStringNumberToCoordonee(reponse);
-			System.out.println(validPos);
-			for(Coordonee co : ListPositionValide) {
-				if(co.getX() == validPos.getX() && co.getY() == validPos.getY()) { // if(ListPositionValide.contains(validPos)) {
-					Piece p;
-					i = selectedPiece.getX();
-					int j = selectedPiece.getY();
-					
-					while(i != validPos.getX() && j != validPos.getY()) {
-						p = findPiece(i,j);
-						if(p != null && p.getCouleur() != selectedPiece.getCouleur()) {
-							board[p.getX()][p.getY()] = '-';
-							alPieces.remove(p);
-						}
-						i--;
-						j++;
+
+			case 1:
+				// Check if there is a pawn (or more) or a king to eat on the diagonal Northeast.
+				// Then we'll move the king and eat pawns/king in his way.
+				int i = 0;
+				List<Coordonee> ListPositionValide = new ArrayList<Coordonee>(); // position of eatable's pawns/kings.
+				do {
+					// check if the pawn/king is followed by a '-' (empty case).
+					if ((d.getBoard()[selectedPiece.getX() - i][selectedPiece.getY() + i] == enemi ||
+							d.getBoard()[selectedPiece.getX() - i][selectedPiece.getY() + i] == kingEnemi) &&
+							d.getBoard()[selectedPiece.getX() - i - 1][selectedPiece.getY() + i + 1] == '-') {
+						ListPositionValide
+								.add(new Coordonee(selectedPiece.getX() - i - 1, selectedPiece.getY() + i + 1));
 					}
-					board[selectedPiece.getX()][selectedPiece.getY()] = '-';
-					selectedPiece.setX(validPos.getX());
-					selectedPiece.setY(validPos.getY());
-					board[selectedPiece.getX()][selectedPiece.getY()] = selectedPiece.getCouleur();
-				}
-			}
-			if(ListPositionValide.contains(validPos)) { // if(ListPositionValide.contains(validPos)) {
-				Piece p;
-				i = selectedPiece.getX();
-				int j = selectedPiece.getY();
+					i++;
+				} while (d.getBoard()[selectedPiece.getX() - i - 1][selectedPiece.getY() + i + 1] != '*');
 				
-				while(i != validPos.getX() && j != validPos.getY()) {
-					p = findPiece(i,j);
-					if(p != null && p.getCouleur() != selectedPiece.getCouleur()) {
-						board[p.getX()][p.getY()] = '-';
-						alPieces.remove(p);
-					}
-					i--;
-					j++;
+				//Like the king can eat and go further than the case the enemy, we ask the player where he wants to go
+				// while is eating
+
+				System.out.print("Where do you want to go ? : ");
+				for (Coordonee mv : ListPositionValide) {
+					System.out.print(mv + " ");
 				}
-				board[selectedPiece.getX()][selectedPiece.getY()] = '-';
-				selectedPiece.setX(validPos.getX());
-				selectedPiece.setY(validPos.getY());
-				board[selectedPiece.getX()][selectedPiece.getY()] = selectedPiece.getCouleur();
-			}
-			//if(ListPositionValide.contains(response))
-			/*if (tabMap[selectedPiece.getX() - 1][selectedPiece.getY() + 1] == '-') {
-				do {
-					selectedPiece.setX(selectedPiece.getX() - 1);
-					selectedPiece.setY(selectedPiece.getY() + 1);
-					tabMap[selectedPiece.getX()][selectedPiece.getY()] = selectedPiece.getCouleur();
-				} while (tabMap[selectedPiece.getX() - 1][selectedPiece.getY() + 1] == '-');
-			}*/
-			break;
-		case 3:
-			i = 0;
-			ListPositionValide = new ArrayList<Coordonee>(); // position de kill valide
-			do {
-				// check pion ennemi suivie de '-' (position de kill valide)
-				if((board[selectedPiece.getX() + i][selectedPiece.getY() + i] == enemi ||
-						board[selectedPiece.getX() + i][selectedPiece.getY() + i] == kingEnemi) &&
-						board[selectedPiece.getX() + i +1][selectedPiece.getY() + i +1] == '-') {
-					ListPositionValide.add(new Coordonee(selectedPiece.getX() + i +1, selectedPiece.getY() + i +1));
-				}
-				i++;
-			}while(board[selectedPiece.getX() + i+1][selectedPiece.getY() + i+1] != '*');
-			
-			System.out.print("Where do you want to go ? : ");
-			for (Coordonee mv : ListPositionValide) {
-				System.out.print(mv.toString() + " ");
-			}
-			System.out.println("?");
-			
-			reponse = Utilitaires.giveString();
-			validPos = Utilitaires.convertStringNumberToCoordonee(reponse);
-			for(Coordonee co : ListPositionValide) {
-				if(co.getX() == validPos.getX() && co.getY() == validPos.getY()) { // if(ListPositionValide.contains(validPos)) {
-					Piece p;
-					i = selectedPiece.getX();
-					int j = selectedPiece.getY();
-					
-					while(i != validPos.getX() && j != validPos.getY()) {
-						p = findPiece(i,j);
-						if(p != null && p.getCouleur() != selectedPiece.getCouleur()) {
-							board[p.getX()][p.getY()] = '-';
-							alPieces.remove(p);
+				System.out.println("?");
+				
+
+				String reponse = Utilitaires.giveString();
+				Coordonee validPos = Utilitaires.convertStringNumberToCoordonee(reponse);
+				System.out.println(validPos);
+				for (Coordonee co : ListPositionValide) {
+					if (co.getX() == validPos.getX() && co.getY() == validPos.getY()) { 
+						Piece p;
+						i = selectedPiece.getX();
+						int j = selectedPiece.getY();
+
+						while (i != validPos.getX() && j != validPos.getY()) {
+							p = findPiece(i, j);
+							if (p != null && p.getColor() != selectedPiece.getColor()) {
+								d.getBoard()[p.getX()][p.getY()] = '-';
+								d.getAlPieces().remove(p);
+							}
+							i--;
+							j++;
 						}
-						i++;
-						j++;
+						d.getBoard()[selectedPiece.getX()][selectedPiece.getY()] = '-';
+						selectedPiece.setX(validPos.getX());
+						selectedPiece.setY(validPos.getY());
+						d.getBoard()[selectedPiece.getX()][selectedPiece.getY()] = selectedPiece.getColor();
 					}
-					board[selectedPiece.getX()][selectedPiece.getY()] = '-';
-					selectedPiece.setX(validPos.getX());
-					selectedPiece.setY(validPos.getY());
-					board[selectedPiece.getX()][selectedPiece.getY()] = selectedPiece.getCouleur();
 				}
-			}
-			/*if (board[selectedPiece.getX() + 1][selectedPiece.getY() + 1] == '-') {
-				do {
-					selectedPiece.setX(selectedPiece.getX() + 1);
-					selectedPiece.setY(selectedPiece.getY() + 1);
-					board[selectedPiece.getX()][selectedPiece.getY()] = selectedPiece.getCouleur();
-				} while (board[selectedPiece.getX() + 1][selectedPiece.getY() + 1] == '-');
-			}*/
-			break;
-		case 7:
-			i = 0;
-			ListPositionValide = new ArrayList<Coordonee>(); // position de kill valide
-			do {
-				// check pion ennemi suivie de '-' (position de kill valide)
-				if((board[selectedPiece.getX() - i][selectedPiece.getY() - i] == enemi ||
-						board[selectedPiece.getX() - i][selectedPiece.getY() - i] == kingEnemi) &&
-						board[selectedPiece.getX() - i -1][selectedPiece.getY() - i -1] == '-') {
-					ListPositionValide.add(new Coordonee(selectedPiece.getX() - i -1, selectedPiece.getY() - i -1));
-				}
-				i++;
-			}while(board[selectedPiece.getX() - i-1][selectedPiece.getY() - i-1] != '*');
-			
-			System.out.print("Where do you want to go ? : ");
-			for (Coordonee mv : ListPositionValide) {
-				System.out.print(mv + " ");
-			}
-			System.out.println("?");
-			
-			reponse = Utilitaires.giveString();
-			validPos = Utilitaires.convertStringNumberToCoordonee(reponse);
-			for(Coordonee co : ListPositionValide) {
-				if(co.getX() == validPos.getX() && co.getY() == validPos.getY()) { // if(ListPositionValide.contains(validPos)) {
+				if (ListPositionValide.contains(validPos)) { 
 					Piece p;
 					i = selectedPiece.getX();
 					int j = selectedPiece.getY();
-					
-					while(i != validPos.getX() && j != validPos.getY()) {
-						p = findPiece(i,j);
-						if(p != null && p.getCouleur() != selectedPiece.getCouleur()) {
-							board[p.getX()][p.getY()] = '-';
-							alPieces.remove(p);
+
+					while (i != validPos.getX() && j != validPos.getY()) {
+						p = findPiece(i, j);
+						if (p != null && p.getColor() != selectedPiece.getColor()) {
+							d.getBoard()[p.getX()][p.getY()] = '-';
+							d.getAlPieces().remove(p);
 						}
 						i--;
-						j--;
+						j++;
 					}
-					board[selectedPiece.getX()][selectedPiece.getY()] = '-';
+					d.getBoard()[selectedPiece.getX()][selectedPiece.getY()] = '-';
 					selectedPiece.setX(validPos.getX());
 					selectedPiece.setY(validPos.getY());
-					board[selectedPiece.getX()][selectedPiece.getY()] = selectedPiece.getCouleur();
+					d.getBoard()[selectedPiece.getX()][selectedPiece.getY()] = selectedPiece.getColor();
 				}
-			}
-			/*
-			if (board[selectedPiece.getX() - 1][selectedPiece.getY() - 1] == '-') {
+
+				break;
+			case 3:
+				i = 0;
+				ListPositionValide = new ArrayList<Coordonee>(); 
 				do {
-					selectedPiece.setX(selectedPiece.getX() - 1);
-					selectedPiece.setY(selectedPiece.getY() - 1);
-					board[selectedPiece.getX()][selectedPiece.getY()] = selectedPiece.getCouleur();
-				} while (board[selectedPiece.getX() - 1][selectedPiece.getY() - 1] == '-');
-			}*/
-			break;
-		case 9:
-			i = 0;
-			ListPositionValide = new ArrayList<Coordonee>(); // position de kill valide
-			do {
-				// check pion ennemi suivie de '-' (position de kill valide)
-				if((board[selectedPiece.getX() + i][selectedPiece.getY() - i] == enemi ||
-						board[selectedPiece.getX() + i][selectedPiece.getY() - i] == kingEnemi) &&
-						board[selectedPiece.getX() + i +1][selectedPiece.getY() - i -1] == '-') {
-					ListPositionValide.add(new Coordonee(selectedPiece.getX() + i +1, selectedPiece.getY() - i -1));
+				
+					if ((d.getBoard()[selectedPiece.getX() + i][selectedPiece.getY() + i] == enemi ||
+							d.getBoard()[selectedPiece.getX() + i][selectedPiece.getY() + i] == kingEnemi) &&
+							d.getBoard()[selectedPiece.getX() + i + 1][selectedPiece.getY() + i + 1] == '-') {
+						ListPositionValide
+								.add(new Coordonee(selectedPiece.getX() + i + 1, selectedPiece.getY() + i + 1));
+					}
+					i++;
+				} while (d.getBoard()[selectedPiece.getX() + i + 1][selectedPiece.getY() + i + 1] != '*');
+
+				System.out.print("Where do you want to go ? : ");
+				for (Coordonee mv : ListPositionValide) {
+					System.out.print(mv.toString() + " ");
 				}
-				i++;
-			}while(board[selectedPiece.getX() + i+1][selectedPiece.getY() - i-1] != '*');
-			
-			System.out.print("Where do you want to go ? : ");
-			for (Coordonee mv : ListPositionValide) {
-				System.out.print(mv + " ");
-			}
-			System.out.println("?");
-			
-			reponse = Utilitaires.giveString();
-			validPos = Utilitaires.convertStringNumberToCoordonee(reponse);
-			for(Coordonee co : ListPositionValide) {
-				if(co.getX() == validPos.getX() && co.getY() == validPos.getY()) { // if(ListPositionValide.contains(validPos)) {
-					Piece p;
-					i = selectedPiece.getX();
-					int j = selectedPiece.getY();
-					
-					while(i != validPos.getX() && j != validPos.getY()) {
-						p = findPiece(i,j);
-						if(p != null && p.getCouleur() != selectedPiece.getCouleur()) {
-							board[p.getX()][p.getY()] = '-';
-							alPieces.remove(p);
+				System.out.println("?");
+
+				reponse = Utilitaires.giveString();
+				validPos = Utilitaires.convertStringNumberToCoordonee(reponse);
+				for (Coordonee co : ListPositionValide) {
+					if (co.getX() == validPos.getX() && co.getY() == validPos.getY()) { 
+						Piece p;
+						i = selectedPiece.getX();
+						int j = selectedPiece.getY();
+
+						while (i != validPos.getX() && j != validPos.getY()) {
+							p = findPiece(i, j);
+							if (p != null && p.getColor() != selectedPiece.getColor()) {
+								d.getBoard()[p.getX()][p.getY()] = '-';
+								d.getAlPieces().remove(p);
+							}
+							i++;
+							j++;
 						}
-						i++;
-						j--;
+						d.getBoard()[selectedPiece.getX()][selectedPiece.getY()] = '-';
+						selectedPiece.setX(validPos.getX());
+						selectedPiece.setY(validPos.getY());
+						d.getBoard()[selectedPiece.getX()][selectedPiece.getY()] = selectedPiece.getColor();
 					}
-					board[selectedPiece.getX()][selectedPiece.getY()] = '-';
-					selectedPiece.setX(validPos.getX());
-					selectedPiece.setY(validPos.getY());
-					board[selectedPiece.getX()][selectedPiece.getY()] = selectedPiece.getCouleur();
 				}
-			}
-			/*
-			if (board[selectedPiece.getX() + 1][selectedPiece.getY() - 1] == '-') {
+				break;
+			case 7:
+				i = 0;
+				ListPositionValide = new ArrayList<Coordonee>(); 
 				do {
-					selectedPiece.setX(selectedPiece.getX() + 1);
-					selectedPiece.setY(selectedPiece.getY() - 1);
-					board[selectedPiece.getX()][selectedPiece.getY()] = selectedPiece.getCouleur();
-				} while (board[selectedPiece.getX() + 1][selectedPiece.getY() + 1] == '-');
-			}*/
-			break;
-		default:
-			System.out.println("Error");
+
+					if ((d.getBoard()[selectedPiece.getX() - i][selectedPiece.getY() - i] == enemi ||
+							d.getBoard()[selectedPiece.getX() - i][selectedPiece.getY() - i] == kingEnemi) &&
+							d.getBoard()[selectedPiece.getX() - i - 1][selectedPiece.getY() - i - 1] == '-') {
+						ListPositionValide
+								.add(new Coordonee(selectedPiece.getX() - i - 1, selectedPiece.getY() - i - 1));
+					}
+					i++;
+				} while (d.getBoard()[selectedPiece.getX() - i - 1][selectedPiece.getY() - i - 1] != '*');
+
+				System.out.print("Where do you want to go ? : ");
+				for (Coordonee mv : ListPositionValide) {
+					System.out.print(mv + " ");
+				}
+				System.out.println("?");
+
+				reponse = Utilitaires.giveString();
+				validPos = Utilitaires.convertStringNumberToCoordonee(reponse);
+				for (Coordonee co : ListPositionValide) {
+					if (co.getX() == validPos.getX() && co.getY() == validPos.getY()) { 
+						Piece p;
+						i = selectedPiece.getX();
+						int j = selectedPiece.getY();
+
+						while (i != validPos.getX() && j != validPos.getY()) {
+							p = findPiece(i, j);
+							if (p != null && p.getColor() != selectedPiece.getColor()) {
+								d.getBoard()[p.getX()][p.getY()] = '-';
+								d.getAlPieces().remove(p);
+							}
+							i--;
+							j--;
+						}
+						d.getBoard()[selectedPiece.getX()][selectedPiece.getY()] = '-';
+						selectedPiece.setX(validPos.getX());
+						selectedPiece.setY(validPos.getY());
+						d.getBoard()[selectedPiece.getX()][selectedPiece.getY()] = selectedPiece.getColor();
+					}
+				}
+				break;
+			case 9:
+				i = 0;
+				ListPositionValide = new ArrayList<Coordonee>(); 
+				do {
+
+					if ((d.getBoard()[selectedPiece.getX() + i][selectedPiece.getY() - i] == enemi ||
+							d.getBoard()[selectedPiece.getX() + i][selectedPiece.getY() - i] == kingEnemi) &&
+							d.getBoard()[selectedPiece.getX() + i + 1][selectedPiece.getY() - i - 1] == '-') {
+						ListPositionValide
+								.add(new Coordonee(selectedPiece.getX() + i + 1, selectedPiece.getY() - i - 1));
+					}
+					i++;
+				} while (d.getBoard()[selectedPiece.getX() + i + 1][selectedPiece.getY() - i - 1] != '*');
+
+				System.out.print("Where do you want to go ? : ");
+				for (Coordonee mv : ListPositionValide) {
+					System.out.print(mv + " ");
+				}
+				System.out.println("?");
+
+				reponse = Utilitaires.giveString();
+				validPos = Utilitaires.convertStringNumberToCoordonee(reponse);
+				for (Coordonee co : ListPositionValide) {
+					if (co.getX() == validPos.getX() && co.getY() == validPos.getY()) {
+						Piece p;
+						i = selectedPiece.getX();
+						int j = selectedPiece.getY();
+
+						while (i != validPos.getX() && j != validPos.getY()) {
+							p = findPiece(i, j);
+							if (p != null && p.getColor() != selectedPiece.getColor()) {
+								d.getBoard()[p.getX()][p.getY()] = '-';
+								d.getAlPieces().remove(p);
+							}
+							i++;
+							j--;
+						}
+						d.getBoard()[selectedPiece.getX()][selectedPiece.getY()] = '-';
+						selectedPiece.setX(validPos.getX());
+						selectedPiece.setY(validPos.getY());
+						d.getBoard()[selectedPiece.getX()][selectedPiece.getY()] = selectedPiece.getColor();
+					}
+				}
+				break;
+			default:
+				System.out.println("Error");
 		}
 		return true;
 	}
 	
-	
+	//--------------------------------------------------------------------------------------------------------------
 
-
+	/**
+	 * This function will create a folder with the player's name, add a .txt call player1's name + 
+	 * player2's name. It 
+	 * @throws IOException
+	 */
 	private void initFile() throws IOException {
-		System.out.println("player 1 = " + player1 + "\tplayer2 = " + player2);
+		System.out.println("player 1 = " + d.getPlayer1() + "\tplayer2 = " + d.getPlayer2());
 		// takes the date for the history
 		String dateNow = Utilitaires.giveDate();
 		// Create a folder if there is no folder for the player to save their game.
-		Utilitaires.createFolderForUser(player1);
-		Utilitaires.createFolderForUser(player2);
+		Utilitaires.createFolderForUser(d.getPlayer1());
+		Utilitaires.createFolderForUser(d.getPlayer2());
 		// Create name file for history
-		fileNameP1 = "./" + player1 + "/history " + player1 + " VS " + player2 + ".txt";
-		fileNameP2 = "./" + player2 + "/history " + player2 + " VS " + player1 + ".txt";
+		d.setFileNameP1("./" + d.getPlayer1() + "/history " + d.getPlayer1() + " VS " + d.getPlayer2() + ".txt");
+		d.setFileNameP2("./" + d.getPlayer2() + "/history " + d.getPlayer2() + " VS " + d.getPlayer1() + ".txt");
 		// Write the date in both players file
-		Utilitaires.newMatch(dateNow, fileNameP1);
-		Utilitaires.newMatch(dateNow, fileNameP2);
+		Utilitaires.newMatch(dateNow, d.getFileNameP1());
+		Utilitaires.newMatch(dateNow, d.getFileNameP2());
 	}
 
-	public static Piece selectPieceToMove(char[][] map, ArrayList<Piece> alPieces) {
+	//--------------------------------------------------------------------------------------------------------------
+
+/**
+ * Choose one piece among alPieces on the map and return this piece
+ * @param map
+ * @param alPieces
+ * @return
+ */
+	public Piece selectPieceToMove(char[][] map, ArrayList<Piece> alPieces) {
 
 		boolean selecting = true;
 		do {
@@ -420,7 +418,7 @@ public class Game {
 			if (selectedXY.length() == 2 || selectedXY.length() == 3) {
 				if (Utilitaires.isACorrectPosition(selectedXY)) {
 					List<String> selected = Utilitaires.convertAJToStringNumber(selectedXY);
-					for (Piece piece : alPieces) {
+					for (Piece piece : d.getAlPieces()) {
 						if (Integer.parseInt(selected.get(1)) == piece.getX()
 								&& Integer.parseInt(selected.get(0)) == piece.getY()) {
 							selecting = false;
@@ -433,8 +431,16 @@ public class Game {
 		return null;
 	}
 
+	//--------------------------------------------------------------------------------------------------------------
+
+/**
+ * get information of one piece on the map
+ * @param x
+ * @param y
+ * @return
+ */
 	public Piece findPiece(int x, int y) {
-		for (Piece piece : alPieces) {
+		for (Piece piece : d.getAlPieces()) {
 			if (x == piece.getX()
 					&& y == piece.getY()) {
 				return piece;
@@ -442,285 +448,316 @@ public class Game {
 		}
 		return null;
 	}
-	
+
+	//--------------------------------------------------------------------------------------------------------------
+
+/**
+ * eat enemie piece
+ change the postion , and delete piece who get eat
+ * @param move
+ * @param piece
+ * @return
+ */
 	public boolean eat(int move, Piece piece) {
 		int x = piece.getX();
 		int y = piece.getY();
 		int indexToRemove = 0;
 		switch (move) {
-		case 1:
-			board[x][y] = '-';
-			board[x - 1][y + 1] = '-';
-			for (int i = 0; i < alPieces.size(); i++) {
-				if (alPieces.get(i).getX() == x - 1 && alPieces.get(i).getY() == y + 1) {
-					indexToRemove = i;
+			case 1:
+				d.getBoard()[x][y] = '-';
+				d.getBoard()[x - 1][y + 1] = '-';
+				for (int i = 0; i < d.getAlPieces().size(); i++) {
+					if (d.getAlPieces().get(i).getX() == x - 1 && d.getAlPieces().get(i).getY() == y + 1) {
+						indexToRemove = i;
+					}
 				}
-			}
-			alPieces.remove(indexToRemove);
-			piece.setX(x - 2);
-			piece.setY(y + 2);
-			board[piece.getX()][piece.getY()] = piece.getCouleur();
-			System.out.println(piece.getX() + " " + piece.getY());
-			return true;
-		case 3:
-			board[x][y] = '-';
-			board[x + 1][y + 1] = '-';
-			for (int i = 0; i < alPieces.size(); i++) {
-				if (alPieces.get(i).getX() == x + 1 && alPieces.get(i).getY() == y + 1) {
-					indexToRemove = i;
+				d.getAlPieces().remove(indexToRemove);
+				piece.setX(x - 2);
+				piece.setY(y + 2);
+				d.getBoard()[piece.getX()][piece.getY()] = piece.getColor();
+				System.out.println(piece.getX() + " " + piece.getY());
+				return true;
+			case 3:
+				d.getBoard()[x][y] = '-';
+				d.getBoard()[x + 1][y + 1] = '-';
+				for (int i = 0; i < d.getAlPieces().size(); i++) {
+					if (d.getAlPieces().get(i).getX() == x + 1 && d.getAlPieces().get(i).getY() == y + 1) {
+						indexToRemove = i;
+					}
 				}
-			}
-			alPieces.remove(indexToRemove);
-			piece.setX(x + 2);
-			piece.setY(y + 2);
-			System.out.println(piece.getX() + "  crash" + piece.getY());
-			board[piece.getX()][piece.getY()] = piece.getCouleur();
-			System.out.println(piece.getX() + " " + piece.getY());
-			return true;
-		case 7:
-			board[x][y] = '-';
-			board[x - 1][y - 1] = '-';
-			for (int i = 0; i < alPieces.size(); i++) {
-				if (alPieces.get(i).getX() == x - 1 && alPieces.get(i).getY() == y - 1) {
-					indexToRemove = i;
+				d.getAlPieces().remove(indexToRemove);
+				piece.setX(x + 2);
+				piece.setY(y + 2);
+				System.out.println(piece.getX() + "  crash" + piece.getY());
+				d.getBoard()[piece.getX()][piece.getY()] = piece.getColor();
+				System.out.println(piece.getX() + " " + piece.getY());
+				return true;
+			case 7:
+				d.getBoard()[x][y] = '-';
+				d.getBoard()[x - 1][y - 1] = '-';
+				for (int i = 0; i < d.getAlPieces().size(); i++) {
+					if (d.getAlPieces().get(i).getX() == x - 1 && d.getAlPieces().get(i).getY() == y - 1) {
+						indexToRemove = i;
+					}
 				}
-			}
-			alPieces.remove(indexToRemove);
-			piece.setX(x - 2);
-			piece.setY(y - 2);
-			board[piece.getX()][piece.getY()] = piece.getCouleur();
-			System.out.println(piece.getX() + " " + piece.getY());
-			return true;
-		case 9:
-			board[x][y] = '-';
-			board[x + 1][y - 1] = '-';
-			for (int i = 0; i < alPieces.size(); i++) {
-				if (alPieces.get(i).getX() == x + 1 && alPieces.get(i).getY() == y - 1) {
-					indexToRemove = i;
+				d.getAlPieces().remove(indexToRemove);
+				piece.setX(x - 2);
+				piece.setY(y - 2);
+				d.getBoard()[piece.getX()][piece.getY()] = piece.getColor();
+				System.out.println(piece.getX() + " " + piece.getY());
+				return true;
+			case 9:
+				d.getBoard()[x][y] = '-';
+				d.getBoard()[x + 1][y - 1] = '-';
+				for (int i = 0; i < d.getAlPieces().size(); i++) {
+					if (d.getAlPieces().get(i).getX() == x + 1 && d.getAlPieces().get(i).getY() == y - 1) {
+						indexToRemove = i;
+					}
 				}
-			}
-			alPieces.remove(indexToRemove);
-			piece.setX(x + 2);
-			piece.setY(y - 2);
-			board[piece.getX()][piece.getY()] = piece.getCouleur();
-			System.out.println(piece.getX() + " " + piece.getY());
-			return true;
-		default:
-			System.out.println("default error Piece");
-			return false;
+				d.getAlPieces().remove(indexToRemove);
+				piece.setX(x + 2);
+				piece.setY(y - 2);
+				d.getBoard()[piece.getX()][piece.getY()] = piece.getColor();
+				System.out.println(piece.getX() + " " + piece.getY());
+				return true;
+			default:
+				System.out.println("default error Piece");
+				return false;
 		}
 	}
 
+
+	//--------------------------------------------------------------------------------------------------------------
+
+	/**
+	 * move choosen piece and if get to the edge become a king
+	 * @param move
+	 * @param piece
+	 * @return
+	 */
 	public boolean movePieceSelected(String move, Piece piece) {
 		switch (move) {
-		case "1":
-			if (piece.getCouleur() == 'O' && board[piece.getX() - 1][piece.getY() + 1] == '-') {
-				board[piece.getX()][piece.getY()] = '-';
-				piece.setX(piece.getX() - 1);
-				piece.setY(piece.getY() + 1);
-				if (piece.getCouleur() == 'O' && piece.getY() == 10) {
-					System.out.print("One of your piece became a king.");
-					becomeKings(piece);
+			case "1":
+				if (piece.getColor() == d.getColorPlayer2() && d.getBoard()[piece.getX() - 1][piece.getY() + 1] == '-') {
+					d.getBoard()[piece.getX()][piece.getY()] = '-';
+					piece.setX(piece.getX() - 1);
+					piece.setY(piece.getY() + 1);
+					if (piece.getColor() == d.getColorPlayer2() && piece.getY() == 10) {
+						System.out.print("One of your piece became a king.");
+						becomeKings(piece);
+					}
+					d.getBoard()[piece.getX()][piece.getY()] = piece.getColor();
+					return true;
+				} else {
+					return false;
 				}
-				board[piece.getX()][piece.getY()] = piece.getCouleur();
-				return true;
-			} else {
-				return false;
-			}
-		case "3":
-			if (piece.getCouleur() == 'O' && board[piece.getX() + 1][piece.getY() + 1] == '-') {
-				board[piece.getX()][piece.getY()] = '-';
-				piece.setX(piece.getX() + 1);
-				piece.setY(piece.getY() + 1);
-				if (piece.getCouleur() == 'O' && piece.getY() == 10) {
-					System.out.print("Une pion devient dame.");
-					becomeKings(piece);
+			case "3":
+				if (piece.getColor() == d.getColorPlayer2() && d.getBoard()[piece.getX() + 1][piece.getY() + 1] == '-') {
+					d.getBoard()[piece.getX()][piece.getY()] = '-';
+					piece.setX(piece.getX() + 1);
+					piece.setY(piece.getY() + 1);
+					if (piece.getColor() == d.getColorPlayer2() && piece.getY() == 10) {
+						System.out.print("One of your piece became a King.");
+						becomeKings(piece);
+					}
+					d.getBoard()[piece.getX()][piece.getY()] = piece.getColor();
+					return true;
+				} else {
+					return false;
 				}
-				board[piece.getX()][piece.getY()] = piece.getCouleur();
-				return true;
-			} else {
-				return false;
-			}
-		case "7":
-			if (piece.getCouleur() == 'X' && board[piece.getX() - 1][piece.getY() - 1] == '-') {
-				board[piece.getX()][piece.getY()] = '-';
-				piece.setX(piece.getX() - 1);
-				piece.setY(piece.getY() - 1);
-				if (piece.getCouleur() == 'X' && piece.getY() == 1) {
-					System.out.print("One of your piece became a king.");
-					becomeKings(piece);
+			case "7":
+				if (piece.getColor() == d.getColorPlayer1() && d.getBoard()[piece.getX() - 1][piece.getY() - 1] == '-') {
+					d.getBoard()[piece.getX()][piece.getY()] = '-';
+					piece.setX(piece.getX() - 1);
+					piece.setY(piece.getY() - 1);
+					if (piece.getColor() == d.getColorPlayer1() && piece.getY() == 1) {
+						System.out.print("One of your piece became a king.");
+						becomeKings(piece);
+					}
+					d.getBoard()[piece.getX()][piece.getY()] = piece.getColor();
+					return true;
+				} else {
+					return false;
 				}
-				board[piece.getX()][piece.getY()] = piece.getCouleur();
-				return true;
-			} else {
-				return false;
-			}
-		case "9":
-			if (piece.getCouleur() == 'X' && board[piece.getX() + 1][piece.getY() - 1] == '-') {
-				board[piece.getX()][piece.getY()] = '-';
-				piece.setX(piece.getX() + 1);
-				piece.setY(piece.getY() - 1);
+			case "9":
+				if (piece.getColor() == d.getColorPlayer1() && d.getBoard()[piece.getX() + 1][piece.getY() - 1] == '-') {
+					d.getBoard()[piece.getX()][piece.getY()] = '-';
+					piece.setX(piece.getX() + 1);
+					piece.setY(piece.getY() - 1);
 
-				if (piece.getCouleur() == 'X' && piece.getY() == 1) {
-					System.out.print("One of your piece became a king.");
-					becomeKings(piece);
+					if (piece.getColor() == d.getColorPlayer1() && piece.getY() == 1) {
+						System.out.print("One of your piece became a king.");
+						becomeKings(piece);
+					}
+					d.getBoard()[piece.getX()][piece.getY()] = piece.getColor();
+					return true;
+				} else {
+					return false;
 				}
-				board[piece.getX()][piece.getY()] = piece.getCouleur();
-				return true;
-			} else {
+			default:
+				System.out.println("default error");
 				return false;
-			}
-		default:
-			System.out.println("default error");
-			return false;
 		}
 	}
 
-	// distance trop grande pas bien.
+
+		//--------------------------------------------------------------------------------------------------------------
+
+	/**
+	 * move choosen piece who become a king
+	 set a new position and delete the old one
+	 * @param move
+	 * @param piece
+	 * @return
+	 */
 	public boolean moveKingSelected(String move, Piece piece) {
 		int nbMove = 0;
 		boolean cantMove = false;
 		switch (move) {
-		case "1":
-			System.out.println("How many times do you want to go in this way?");
-			nbMove = Utilitaires.giveInt();
-			if ((piece.getX() - nbMove) > 0 && (piece.getY() + nbMove) <= 10) {
-				for (int i = 1; i <= nbMove; i++) {
-					if (board[piece.getX() - i][piece.getY() + i] != '-') {
-						cantMove = true;
+			case "1":
+				System.out.println("How many times do you want to go in this way?");
+				nbMove = Utilitaires.giveInt();
+				if ((piece.getX() - nbMove) > 0 && (piece.getY() + nbMove) <= 10) {
+					for (int i = 1; i <= nbMove; i++) {
+						if (d.getBoard()[piece.getX() - i][piece.getY() + i] != '-') {
+							cantMove = true;
+						}
 					}
-				}
-				if (cantMove == true) {
-					System.out.println("Bad range, insert another one.");
-					return false;
-				} else {
-					piece.setX(piece.getX() - nbMove);
-					piece.setY(piece.getY() + nbMove);
-					board[piece.getX()][piece.getY()] = piece.getCouleur();
-					return true;
-				}
-			} else {
-				System.out.println("Too high.");
-				return false;
-			}
-		case "3":
-			System.out.println("How many times do you want to go in this way?");
-			nbMove = Utilitaires.giveInt();
-			if ((piece.getX() + nbMove) <= 10 && (piece.getY() + nbMove) <= 10) {
-				for (int i = 1; i <= nbMove; i++) {
-					if (board[piece.getX() + i][piece.getY() + i] != '-') {
-						cantMove = true;
+					if (cantMove == true) {
+						System.out.println("Bad range, insert another one.");
+						return false;
+					} else {
+						piece.setX(piece.getX() - nbMove);
+						piece.setY(piece.getY() + nbMove);
+						d.getBoard()[piece.getX()][piece.getY()] = piece.getColor();
+						return true;
 					}
-				}
-				if (cantMove == true) {
-					System.out.println("Bad range, insert another one.");
-					return false;
 				} else {
-					piece.setX(piece.getX() + nbMove);
-					piece.setY(piece.getY() + nbMove);
-					board[piece.getX()][piece.getY()] = piece.getCouleur();
-					return true;
+					System.out.println("Too high.");
+					return false;
 				}
-			} else {
-				System.out.println("Too high.");
-				return false;
-			}
-			// break;
-		case "7":
-			System.out.println("How many times do you want to go in this way?");
-			nbMove = Utilitaires.giveInt();
-			if ((piece.getX() - nbMove) > 0 && (piece.getY() - nbMove) > 0) {
+			case "3":
+				System.out.println("How many times do you want to go in this way?");
+				nbMove = Utilitaires.giveInt();
+				if ((piece.getX() + nbMove) <= 10 && (piece.getY() + nbMove) <= 10) {
+					for (int i = 1; i <= nbMove; i++) {
+						if (d.getBoard()[piece.getX() + i][piece.getY() + i] != '-') {
+							cantMove = true;
+						}
+					}
+					if (cantMove == true) {
+						System.out.println("Bad range, insert another one.");
+						return false;
+					} else {
+						piece.setX(piece.getX() + nbMove);
+						piece.setY(piece.getY() + nbMove);
+						d.getBoard()[piece.getX()][piece.getY()] = piece.getColor();
+						return true;
+					}
+				} else {
+					System.out.println("Too high.");
+					return false;
+				}
+				// break;
+			case "7":
+				System.out.println("How many times do you want to go in this way?");
+				nbMove = Utilitaires.giveInt();
+				if ((piece.getX() - nbMove) > 0 && (piece.getY() - nbMove) > 0) {
 
-				for (int i = 1; i <= nbMove; i++) {
-					if (board[piece.getX() - i][piece.getY() - i] != '-') {
-						cantMove = true;
+					for (int i = 1; i <= nbMove; i++) {
+						if (d.getBoard()[piece.getX() - i][piece.getY() - i] != '-') {
+							cantMove = true;
+						}
 					}
-				}
-				if (cantMove == true) {
-					System.out.println("Bad range, insert another one.");
-					return false;
-				} else {
-					piece.setX(piece.getX() - nbMove);
-					piece.setY(piece.getY() - nbMove);
-					board[piece.getX()][piece.getY()] = piece.getCouleur();
-					return true;
-				}
-			} else {
-				System.out.println("Too high.");
-				return false;
-			}
-			// break;
-		case "9":
-			System.out.println("How many times do you want to go in this way?");
-			nbMove = Utilitaires.giveInt();
-			if ((piece.getX() + nbMove) <= 10 && (piece.getY() - nbMove) > 0) {
-				for (int i = 1; i <= nbMove; i++) {
-					if (board[piece.getX() + i][piece.getY() - i] != '-') {
-						cantMove = true;
+					if (cantMove == true) {
+						System.out.println("Bad range, insert another one.");
+						return false;
+					} else {
+						piece.setX(piece.getX() - nbMove);
+						piece.setY(piece.getY() - nbMove);
+						d.getBoard()[piece.getX()][piece.getY()] = piece.getColor();
+						return true;
 					}
-				}
-				if (cantMove == true) {
-					System.out.println("Bad range, insert another one.");
-					return false;
 				} else {
-					piece.setX(piece.getX() + nbMove);
-					piece.setY(piece.getY() - nbMove);
-					board[piece.getX()][piece.getY()] = piece.getCouleur();
-					return true;
+					System.out.println("Too high.");
+					return false;
 				}
-			} else {
-				System.out.println("Too high.");
+				// break;
+			case "9":
+				System.out.println("How many times do you want to go in this way?");
+				nbMove = Utilitaires.giveInt();
+				if ((piece.getX() + nbMove) <= 10 && (piece.getY() - nbMove) > 0) {
+					for (int i = 1; i <= nbMove; i++) {
+						if (d.getBoard()[piece.getX() + i][piece.getY() - i] != '-') {
+							cantMove = true;
+						}
+					}
+					if (cantMove == true) {
+						System.out.println("Bad range, insert another one.");
+						return false;
+					} else {
+						piece.setX(piece.getX() + nbMove);
+						piece.setY(piece.getY() - nbMove);
+						d.getBoard()[piece.getX()][piece.getY()] = piece.getColor();
+						return true;
+					}
+				} else {
+					System.out.println("Too high.");
+					return false;
+				}
+				// break;
+			default:
+				System.out.println("default error");
 				return false;
-			}
-			// break;
-		default:
-			System.out.println("default error");
-			return false;
 		}
 	}
 
+
+		//--------------------------------------------------------------------------------------------------------------
+
+	/**
+	 * @param piece
+	 */
 	private void becomeKings(Piece piece) {
-			piece.setCouleur(piece.getKingColor());
-			board[piece.getX()][piece.getY()] = piece.getCouleur();
+		piece.setCouleur(piece.getKingColor());
+		d.getBoard()[piece.getX()][piece.getY()] = piece.getColor();
 	}
 
-	private Map<Piece, int[]> checkIfCanEat(Map<Piece, int[]> comestible) {
-		char color;
-		char enemi;
-		char kingEnemi;
+		//--------------------------------------------------------------------------------------------------------------
 
-		if (player1Turn) {
-			color = 'X';
-			enemi = 'O';
-			kingEnemi = '@';
-		} else {
-			color = 'O';
-			enemi = 'X';
-			kingEnemi = '#';
-		}
-		for (Piece pi : alPieces) {
-			if (pi.getCouleur() == color) {
-				if (board[pi.getX() - 1][pi.getY() + 1] == enemi
-						|| board[pi.getX() - 1][pi.getY() + 1] == kingEnemi) {
-					if (board[pi.getX() - 2][pi.getY() + 2] == '-') {
+	/**
+	 * 
+	 * @param comestible
+	 * @return
+	 */
+	private Map<Piece, int[]> checkIfCanEat(Map<Piece, int[]> comestible) {
+		char color = d.isPlayer1Turn() ? d.getColorPlayer1() : d.getColorPlayer2();
+		char enemi = d.isPlayer1Turn() ? d.getColorPlayer2() : d.getColorPlayer1();
+		char kingEnemi = d.isPlayer1Turn() ? d.getKingColorPlayer2() : d.getKingColorPlayer1();
+		
+		for (Piece pi : d.getAlPieces()) {
+			if (pi.getColor() == color) {
+				if (d.getBoard()[pi.getX() - 1][pi.getY() + 1] == enemi
+						|| d.getBoard()[pi.getX() - 1][pi.getY() + 1] == kingEnemi) {
+					if (d.getBoard()[pi.getX() - 2][pi.getY() + 2] == '-') {
 						comestible.put(pi, new int[] { 1 });
 					}
 				}
-				if (board[pi.getX() + 1][pi.getY() + 1] == enemi
-						|| board[pi.getX() + 1][pi.getY() + 1] == kingEnemi) {
-					if (board[pi.getX() + 2][pi.getY() + 2] == '-') {
+				if (d.getBoard()[pi.getX() + 1][pi.getY() + 1] == enemi
+						|| d.getBoard()[pi.getX() + 1][pi.getY() + 1] == kingEnemi) {
+					if (d.getBoard()[pi.getX() + 2][pi.getY() + 2] == '-') {
 						comestible.put(pi, new int[] { 3 });
 					}
 				}
-				if (board[pi.getX() - 1][pi.getY() - 1] == enemi
-						|| board[pi.getX() - 1][pi.getY() - 1] == kingEnemi) {
-					if (board[pi.getX() - 2][pi.getY() - 2] == '-') {
+				if (d.getBoard()[pi.getX() - 1][pi.getY() - 1] == enemi
+						|| d.getBoard()[pi.getX() - 1][pi.getY() - 1] == kingEnemi) {
+					if (d.getBoard()[pi.getX() - 2][pi.getY() - 2] == '-') {
 						comestible.put(pi, new int[] { 7 });
 					}
 				}
-				if (board[pi.getX() + 1][pi.getY() - 1] == enemi
-						|| board[pi.getX() + 1][pi.getY() - 1] == kingEnemi) {
-					if (board[pi.getX() + 2][pi.getY() - 2] == '-') {
+				if (d.getBoard()[pi.getX() + 1][pi.getY() - 1] == enemi
+						|| d.getBoard()[pi.getX() + 1][pi.getY() - 1] == kingEnemi) {
+					if (d.getBoard()[pi.getX() + 2][pi.getY() - 2] == '-') {
 						comestible.put(pi, new int[] { 9 });
 					}
 				}
@@ -729,107 +766,72 @@ public class Game {
 		return comestible;
 	}
 
+	//--------------------------------------------------------------------------------------------------------------
+
+	/**
+	 * 
+	 * @param tabMap2
+	 * @param alPieces2
+	 * @param comestible
+	 * @return
+	 */
 	private Map<Piece, int[]> checkIfKingCanEat(char[][] tabMap2, ArrayList<Piece> alPieces2,
 			Map<Piece, int[]> comestible) {
 
-		char kingAlly;
-		char enemi;
-		char kingEnemi;
-
-		if (player1Turn) {
-			kingAlly = '#';
-			enemi = 'O';
-			kingEnemi = '@';
-		} else {
-			kingAlly = '@';
-			enemi = 'X';
-			kingEnemi = '#';
-		}
+		char kingAlly = d.isPlayer1Turn() ? d.getKingColorPlayer1() : d.getKingColorPlayer2();
+		char enemi = d.isPlayer1Turn() ? d.getColorPlayer2() : d.getColorPlayer1();
+		char kingEnemi = d.isPlayer1Turn() ? d.getKingColorPlayer2() : d.getKingColorPlayer1();
+		
 		for (Piece pi : alPieces2) {
 			int i = 0;
-			if (pi.getCouleur() == kingAlly) {
+			if (pi.getColor() == kingAlly) {
 				// 1
 				do {
 					i++;
-					if (board[pi.getX() - i][pi.getY() + i] == enemi
-							|| board[pi.getX() - i][pi.getY() + i] == kingEnemi) {
-						if (board[pi.getX() - i - 1][pi.getY() + i + 1] == '-') {
+					if (d.getBoard()[pi.getX() - i][pi.getY() + i] == enemi
+							|| d.getBoard()[pi.getX() - i][pi.getY() + i] == kingEnemi) {
+						if (d.getBoard()[pi.getX() - i - 1][pi.getY() + i + 1] == '-') {
 							comestible.put(pi, new int[] { 1 });
 						}
 					}
-				} while (board[pi.getX() - i][pi.getY() + i] != '*');
+				} while (d.getBoard()[pi.getX() - i][pi.getY() + i] != '*');
 				i = 0;
 				// 3
 				do {
 					i++;
-					if (board[pi.getX() + i][pi.getY() + i] == enemi
-							|| board[pi.getX() + i][pi.getY() + i] == kingEnemi) {
-						if (board[pi.getX() + i + 1][pi.getY() + i + 1] == '-') {
+					if (d.getBoard()[pi.getX() + i][pi.getY() + i] == enemi
+							|| d.getBoard()[pi.getX() + i][pi.getY() + i] == kingEnemi) {
+						if (d.getBoard()[pi.getX() + i + 1][pi.getY() + i + 1] == '-') {
 							comestible.put(pi, new int[] { 3 });
 						}
 					}
-				} while (board[pi.getX() + i][pi.getY() + i] != '*');
+				} while (d.getBoard()[pi.getX() + i][pi.getY() + i] != '*');
 				i = 0;
 				// 7
 				do {
 					i++;
-					if (board[pi.getX() - i][pi.getY() - i] == enemi
-							|| board[pi.getX() - i][pi.getY() - i] == kingEnemi) {
+					if (d.getBoard()[pi.getX() - i][pi.getY() - i] == enemi
+							|| d.getBoard()[pi.getX() - i][pi.getY() - i] == kingEnemi) {
 
-						if (board[pi.getX() - i - 1][pi.getY() - i - 1] == '-') {
+						if (d.getBoard()[pi.getX() - i - 1][pi.getY() - i - 1] == '-') {
 							comestible.put(pi, new int[] { 7 });
 						}
 					}
-				} while (board[pi.getX() - i][pi.getY() - i] != '*');
+				} while (d.getBoard()[pi.getX() - i][pi.getY() - i] != '*');
 				i = 0;
 				// 9
 				do {
 					i++;
-					if (board[pi.getX() + i][pi.getY() - i] == enemi
-							|| board[pi.getX() + i][pi.getY() - i] == kingEnemi) {
+					if (d.getBoard()[pi.getX() + i][pi.getY() - i] == enemi
+							|| d.getBoard()[pi.getX() + i][pi.getY() - i] == kingEnemi) {
 
-						if (board[pi.getX() + i + 1][pi.getY() - i - 1] == '-') {
+						if (d.getBoard()[pi.getX() + i + 1][pi.getY() - i - 1] == '-') {
 							comestible.put(pi, new int[] { 9 });
 						}
 					}
-				} while (board[pi.getX() + i][pi.getY() - i] != '*');
+				} while (d.getBoard()[pi.getX() + i][pi.getY() - i] != '*');
 			}
 		}
 		return comestible;
-	}
-	
-	private boolean checkSelectedPieceInComestible(Piece selectedPiece, Map<Piece, int[]> comestible) {
-		if (comestible.containsKey(selectedPiece)) {
-			System.out.println("piece can eat");
-			return true;
-		}
-		System.out.println("another piece can eat !");
-		return false;
-		
-	}
-	
-	private boolean checkSelectedPiece(Piece pi) {
-		if ((!player1Turn && (pi.getCouleur() == 'X' || pi.getCouleur() == '#')
-				|| (player1Turn) && (pi.getCouleur() == 'O' || pi.getCouleur() == '@'))) {
-			System.out.println("it's not the turn of this piece");
-			return false;
-		}
-		if(!checkIfPieceCanMove(pi)) {
-			return false;
-		}
-		System.out.println("piece in " + pi.getX() + ", " + pi.getY() + " selected !");
-		return true;
-	}
-
-	private boolean checkIfPieceCanMove(Piece pi) {
-		// Check if piece can move in 1 3 7 9 direction
-		if ((pi.getCouleur() == 'O' && board[pi.getX() - 1][pi.getY() + 1] != '-' && // check for direction 1
-				board[pi.getX() + 1][pi.getY() + 1] != '-') || // check for direction 3
-				(pi.getCouleur() == 'X' && board[pi.getX() - 1][pi.getY() - 1] != '-' && // check for direction 7
-				board[pi.getX() + 1][pi.getY() - 1] != '-')) { // check for direction 9
-			System.out.println("Can't move this piece");
-			return false;
-		}
-		return true;
 	}
 }
