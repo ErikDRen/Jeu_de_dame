@@ -12,34 +12,29 @@ import utile.Utilitaires;
 
 public class IA {
 
-
-    
-
+	//--------------------------------------------------------------------------------------------------------------
 
     public ArrayList<Piece> getAlPiecesCanMoveIA(Data d) {
-    	
     	ArrayList<Piece> temp = new ArrayList<Piece>();
-    	
         for (Piece p : d.getAlPieces())
         {
         	//Check.checkIfPieceCanMove(p, d);
-        	if(Check.checkIfPieceCanMove(p, d) == true) {
+        	if((p.getColor() == d.getColorPlayer2() || p.getColor() == d.getKingColorPlayer2()) && Check.checkSelectedPiece(p, d) == true) {
         		temp.add(p);
-        		return temp;
         	}
         }
-        System.out.println("nothing can move !");
-		return null;
+		return temp;
     } 
 
     // -------------------------------------------------------------------------------------------------------------
 
     public Piece selectPieceIA(Data d) {
-    	
     	ArrayList<Piece> temp;
     	temp = getAlPiecesCanMoveIA(d);
-
-        String location = temp.get(Utilitaires.getRandomNumberInRange(0, temp.size())).toString();
+        Piece Piece = temp.get(Utilitaires.getRandomNumberInRange(0, temp.size()-1));
+        Coordonee c = new Coordonee(Piece.getX(), Piece.getY());
+        String location = Utilitaires.convertCoordoneeToAJ(c);
+        System.out.println(location);
 		boolean selecting = true;
 		do {
 			//System.out.println("Choose a valid position (ex : a3) : ");
@@ -132,7 +127,6 @@ public class IA {
     }
 
     // --------------------------------------------------------------------------------------------------------------
-
 
 	public boolean moveKingSelectedIA(Data d, Piece piece) {
 		int nbMove = 0;
@@ -229,20 +223,39 @@ public class IA {
 					//System.out.println("Too high.");
 					return false;
 				}
-				// break;
 			default:
 				//System.out.println("default error");
 				return false;
 		}
 	}
-	
+
 	//--------------------------------------------------------------------------------------------------------------
 
-	public boolean eatIA(Data d, Piece piece) {
+	public boolean mooveToEatIA(Piece selectedPiece, Map<Piece, int[]> comestible, Data d) {
+		List<Integer> tempDir = new ArrayList<Integer>();
+		System.out.print("In wich direction do you want to eat : ");
+		for (int mv : comestible.get(selectedPiece)) {
+			tempDir.add(mv);
+			System.out.print(mv + " ");
+		}
+		System.out.println("?");
+		int rep = tempDir.get(0);
+		System.out.println(rep);
+			if (selectedPiece.getColor() == '@' || selectedPiece.getColor() == '#') {
+				moveKingToEatIA(selectedPiece, comestible, rep,d);
+			} else {
+				eatIA(rep, selectedPiece, d);
+			}
+		return true;
+	}
+
+	//--------------------------------------------------------------------------------------------------------------
+
+	public boolean eatIA(int rep, Piece piece, Data d) {
 		int x = piece.getX();
 		int y = piece.getY();
 		int indexToRemove = 0;
-		switch (Utilitaires.getRandomNumberInRange(1, 4)) {
+		switch (rep) {
 			case 1:
 				d.getBoard()[x][y] = '-';
 				d.getBoard()[x - 1][y + 1] = '-';
@@ -257,7 +270,7 @@ public class IA {
 				d.getBoard()[piece.getX()][piece.getY()] = piece.getColor();
 				System.out.println(piece.getX() + " " + piece.getY());
 				return true;
-			case 2:
+			case 3:
 				d.getBoard()[x][y] = '-';
 				d.getBoard()[x + 1][y + 1] = '-';
 				for (int i = 0; i < d.getAlPieces().size(); i++) {
@@ -272,7 +285,7 @@ public class IA {
 				d.getBoard()[piece.getX()][piece.getY()] = piece.getColor();
 				System.out.println(piece.getX() + " " + piece.getY());
 				return true;
-			case 3:
+			case 7:
 				d.getBoard()[x][y] = '-';
 				d.getBoard()[x - 1][y - 1] = '-';
 				for (int i = 0; i < d.getAlPieces().size(); i++) {
@@ -286,7 +299,7 @@ public class IA {
 				d.getBoard()[piece.getX()][piece.getY()] = piece.getColor();
 				System.out.println(piece.getX() + " " + piece.getY());
 				return true;
-			case 4:
+			case 9:
 				d.getBoard()[x][y] = '-';
 				d.getBoard()[x + 1][y - 1] = '-';
 				for (int i = 0; i < d.getAlPieces().size(); i++) {
@@ -308,11 +321,11 @@ public class IA {
 	
 	//--------------------------------------------------------------------------------------------------------------
 	
-	private boolean moveKingToEat(Piece selectedPiece, Map<Piece, int[]> comestible,  Data d) {
-		char enemi = d.isPlayer1Turn() ? d.getColorPlayer2() : d.getColorPlayer1();
-		char kingEnemi = d.isPlayer1Turn() ? d.getKingColorPlayer2() : d.getKingColorPlayer1();
+	private boolean moveKingToEatIA(Piece selectedPiece, Map<Piece, int[]> comestible,int rep,  Data d) {
+		char enemi = d.getColorPlayer1();
+		char kingEnemi = d.getKingColorPlayer1();
 
-		switch (Utilitaires.getRandomNumberInRange(0, 4)) {
+		switch (rep) {
 
 			case 1:
 				// Check if there is a pawn (or more) or a king to eat on the diagonal Northeast.
@@ -332,23 +345,14 @@ public class IA {
 				
 				//Like the king can eat and go further than the case the enemy, we ask the player where he wants to go
 				// while is eating
-
-				//System.out.print("Where do you want to go ? : ");
-				//for (Coordonee mv : ListPositionValide) {
-					//System.out.print(mv + " ");
-				//}
-				//System.out.println("?");
 				
-
-				String reponse = ListPositionValide.get(Utilitaires.getRandomNumberInRange(0, ListPositionValide.size())).toString();
-				Coordonee validPos = Utilitaires.convertStringNumberToCoordonee(reponse);
+				Coordonee validPos = ListPositionValide.get(0);
 				//System.out.println(validPos);
 				for (Coordonee co : ListPositionValide) {
 					if (co.getX() == validPos.getX() && co.getY() == validPos.getY()) { 
 						Piece p;
 						i = selectedPiece.getX();
 						int j = selectedPiece.getY();
-
 						while (i != validPos.getX() && j != validPos.getY()) {
 							p = Game.findPiece(i, j,d);
 							if (p != null && p.getColor() != selectedPiece.getColor()) {
@@ -383,9 +387,8 @@ public class IA {
 					selectedPiece.setY(validPos.getY());
 					d.getBoard()[selectedPiece.getX()][selectedPiece.getY()] = selectedPiece.getColor();
 				}
-
 				break;
-			case 2:
+			case 3:
 				i = 0;
 				ListPositionValide = new ArrayList<Coordonee>(); 
 				do {
@@ -398,21 +401,12 @@ public class IA {
 					}
 					i++;
 				} while (d.getBoard()[selectedPiece.getX() + i + 1][selectedPiece.getY() + i + 1] != '*');
-
-				//System.out.print("Where do you want to go ? : ");
-				//for (Coordonee mv : ListPositionValide) {
-					//System.out.print(mv.toString() + " ");
-				//}
-				//System.out.println("?");
-
-				reponse = ListPositionValide.get(Utilitaires.getRandomNumberInRange(0, ListPositionValide.size())).toString();
-				validPos = Utilitaires.convertStringNumberToCoordonee(reponse);
+				validPos = ListPositionValide.get(0);
 				for (Coordonee co : ListPositionValide) {
 					if (co.getX() == validPos.getX() && co.getY() == validPos.getY()) { 
 						Piece p;
 						i = selectedPiece.getX();
 						int j = selectedPiece.getY();
-
 						while (i != validPos.getX() && j != validPos.getY()) {
 							p = Game.findPiece(i, j,d);
 							if (p != null && p.getColor() != selectedPiece.getColor()) {
@@ -429,11 +423,10 @@ public class IA {
 					}
 				}
 				break;
-			case 3:
+			case 7:
 				i = 0;
 				ListPositionValide = new ArrayList<Coordonee>(); 
 				do {
-
 					if ((d.getBoard()[selectedPiece.getX() - i][selectedPiece.getY() - i] == enemi ||
 							d.getBoard()[selectedPiece.getX() - i][selectedPiece.getY() - i] == kingEnemi) &&
 							d.getBoard()[selectedPiece.getX() - i - 1][selectedPiece.getY() - i - 1] == '-') {
@@ -442,15 +435,7 @@ public class IA {
 					}
 					i++;
 				} while (d.getBoard()[selectedPiece.getX() - i - 1][selectedPiece.getY() - i - 1] != '*');
-
-				//System.out.print("Where do you want to go ? : ");
-				//for (Coordonee mv : ListPositionValide) {
-				//	System.out.print(mv + " ");
-				//}
-				//System.out.println("?");
-
-				reponse = ListPositionValide.get(Utilitaires.getRandomNumberInRange(0, ListPositionValide.size())).toString();
-				validPos = Utilitaires.convertStringNumberToCoordonee(reponse);
+				validPos = ListPositionValide.get(0);
 				for (Coordonee co : ListPositionValide) {
 					if (co.getX() == validPos.getX() && co.getY() == validPos.getY()) { 
 						Piece p;
@@ -473,7 +458,7 @@ public class IA {
 					}
 				}
 				break;
-			case 4:
+			case 9:
 				i = 0;
 				ListPositionValide = new ArrayList<Coordonee>(); 
 				do {
@@ -486,15 +471,7 @@ public class IA {
 					}
 					i++;
 				} while (d.getBoard()[selectedPiece.getX() + i + 1][selectedPiece.getY() - i - 1] != '*');
-
-				//System.out.print("Where do you want to go ? : ");
-				//for (Coordonee mv : ListPositionValide) {
-				//	System.out.print(mv + " ");
-				//}
-				//System.out.println("?");
-
-				reponse = ListPositionValide.get(Utilitaires.getRandomNumberInRange(0, ListPositionValide.size())).toString();
-				validPos = Utilitaires.convertStringNumberToCoordonee(reponse);
+				validPos = ListPositionValide.get(0);
 				for (Coordonee co : ListPositionValide) {
 					if (co.getX() == validPos.getX() && co.getY() == validPos.getY()) {
 						Piece p;

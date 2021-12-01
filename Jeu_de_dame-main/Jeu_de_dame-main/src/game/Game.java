@@ -14,9 +14,14 @@ import utile.Utilitaires;
 
 public class Game {
 
+	//--------------------------------------------------------------------------------------------------------------
+
 	Data d;
 	Check c = new Check();
 	IA ia;
+
+	//--------------------------------------------------------------------------------------------------------------
+
 	public Game(String p1, String p2, Data d) {
 		super();
 		this.d = d;
@@ -34,6 +39,8 @@ public class Game {
 		d.setPlayer1(p1);
 		d.setPlayer2("IA");
 	}
+
+	//--------------------------------------------------------------------------------------------------------------
 
 	/**
 	 * The game function is the core of the program, it will call functions for the execution of the game.
@@ -74,7 +81,7 @@ public class Game {
 				if (comestible.isEmpty()) {
 					
 					if (!Check.checkIfPlayerCanMove(d)) {
-						System.out.println("/!\\ Vous ne pouvez pas jouer, votre tour est passer /!\\");
+						System.out.println("/!\\ You cant play , its not your turn /!\\");
 						d.setPlayer1Turn(!d.isPlayer1Turn());
 						return;
 					}
@@ -101,9 +108,8 @@ public class Game {
 					do {
 						if (selectedPiece.getColor() == d.getColorPlayer2()
 								|| selectedPiece.getColor() == d.getKingColorPlayer1()) {
-							// mooveKingToEat ??
-						} // else ?
-						mooved = mooveToEat(selectedPiece, comestible);
+						}
+						mooved = ia.mooveToEatIA(selectedPiece, comestible,d);
 						comestible.clear();
 						comestible = Check.checkIfCanEat(comestible, d);
 						comestible = Check.checkIfKingCanEat(d, comestible);
@@ -121,10 +127,11 @@ public class Game {
 			}
 			d.setPlayer1Turn(!d.isPlayer1Turn());
 		}else {
-			System.out.println("Perdu !");
+			System.out.println("Loose !");
 		}
-
 	}
+
+	//--------------------------------------------------------------------------------------------------------------
 
 	/**
 	 * The turn manager ! 
@@ -140,7 +147,7 @@ public class Game {
 				if (comestible.isEmpty()) {
 					
 					if (!Check.checkIfPlayerCanMove(d)) {
-						System.out.println("/!\\ Vous ne pouvez pas jouer, votre tour est pass� /!\\");
+						System.out.println("/!\\ You cant play , its not your turn /!\\");
 						d.setPlayer1Turn(!d.isPlayer1Turn());
 						return;
 					}
@@ -187,10 +194,11 @@ public class Game {
 			}
 			d.setPlayer1Turn(!d.isPlayer1Turn());
 		}else {
-			System.out.println("Perdu !");
+			System.out.println("Loose !");
 		}
-
 	}
+
+	//--------------------------------------------------------------------------------------------------------------
 
 	private boolean checkIfStillHavePieces() {
 		char color = d.isPlayer1Turn() ? d.getColorPlayer1() : d.getColorPlayer2();
@@ -216,7 +224,6 @@ public class Game {
 	 * @return
 	 */ 
 	private boolean mooveToEat(Piece selectedPiece, Map<Piece, int[]> comestible) {
-		// TODO Auto-generated method stub
 		List<Integer> tempDir = new ArrayList<Integer>();
 		System.out.print("In wich direction do you want to eat : ");
 		for (int mv : comestible.get(selectedPiece)) {
@@ -489,12 +496,12 @@ public class Game {
 
 	//--------------------------------------------------------------------------------------------------------------
 
-/**
- * Choose one piece among alPieces on the map and return this piece
- * @param map
- * @param alPieces
- * @return
- */
+	/**
+	* Choose one piece among alPieces on the map and return this piece
+	* @param map
+	* @param alPieces
+	* @return
+	*/
 	public Piece selectPieceToMove(char[][] map, ArrayList<Piece> alPieces) {
 
 		boolean selecting = true;
@@ -519,12 +526,12 @@ public class Game {
 
 	//--------------------------------------------------------------------------------------------------------------
 
-/**
- * get information of one piece on the map
- * @param x
- * @param y
- * @return
- */
+	/**
+	* get information of one piece on the map
+	* @param x
+	* @param y
+	* @return
+	*/
 	public static Piece findPiece(int x, int y,Data d) {
 		for (Piece piece : d.getAlPieces()) {
 			if (x == piece.getX()
@@ -537,13 +544,13 @@ public class Game {
 
 	//--------------------------------------------------------------------------------------------------------------
 
-/**
- * eat enemie piece
- change the postion , and delete piece who get eat
- * @param move
- * @param piece
- * @return
- */
+	/**
+	* eat enemie piece
+	change the postion , and delete piece who get eat
+	* @param move
+	* @param piece
+	* @return
+	*/
 	public boolean eat(int move, Piece piece) {
 		int x = piece.getX();
 		int y = piece.getY();
@@ -574,7 +581,7 @@ public class Game {
 				d.getAlPieces().remove(indexToRemove);
 				piece.setX(x + 2);
 				piece.setY(y + 2);
-				System.out.println(piece.getX() + "  crash" + piece.getY());
+				System.out.println(piece.getX() + " " + piece.getY());
 				d.getBoard()[piece.getX()][piece.getY()] = piece.getColor();
 				System.out.println(piece.getX() + " " + piece.getY());
 				return true;
@@ -611,7 +618,6 @@ public class Game {
 				return false;
 		}
 	}
-
 
 	//--------------------------------------------------------------------------------------------------------------
 
@@ -686,8 +692,7 @@ public class Game {
 		}
 	}
 
-
-		//--------------------------------------------------------------------------------------------------------------
+	//--------------------------------------------------------------------------------------------------------------
 
 	/**
 	 * move choosen piece who become a king
@@ -719,7 +724,7 @@ public class Game {
 						return true;
 					}
 				} else {
-					System.out.println("Too high.");
+					System.out.println("Too high, insert another one.");
 					return false;
 				}
 			case "3":
@@ -741,7 +746,7 @@ public class Game {
 						return true;
 					}
 				} else {
-					System.out.println("Too high.");
+					System.out.println("Too high, insert another one.");
 					return false;
 				}
 				// break;
@@ -765,7 +770,7 @@ public class Game {
 						return true;
 					}
 				} else {
-					System.out.println("Too high.");
+					System.out.println("Too high, insert another one.");
 					return false;
 				}
 				// break;
@@ -788,7 +793,7 @@ public class Game {
 						return true;
 					}
 				} else {
-					System.out.println("Too high.");
+					System.out.println("Too high, insert another one.");
 					return false;
 				}
 				// break;
@@ -799,7 +804,7 @@ public class Game {
 	}
 
 
-		//--------------------------------------------------------------------------------------------------------------
+	//--------------------------------------------------------------------------------------------------------------
 
 	/**
 	 * @param piece
@@ -808,7 +813,4 @@ public class Game {
 		piece.setCouleur(piece.getKingColor());
 		d.getBoard()[piece.getX()][piece.getY()] = piece.getColor();
 	}
-
-	
-
 }

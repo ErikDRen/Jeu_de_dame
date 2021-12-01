@@ -7,11 +7,8 @@ import model.Piece;
 
 public class Check {
 
-	/**
-	 * 
-	 * @param d
-	 * @return
-	 */
+	//--------------------------------------------------------------------------------------------------------------
+
 	public static boolean checkIfPlayerCanMove(Data d) {
 		char color = d.isPlayer1Turn() ? d.getColorPlayer1() : d.getColorPlayer2();
 		char kingColor = d.isPlayer1Turn() ? d.getKingColorPlayer1() : d.getKingColorPlayer2();
@@ -25,12 +22,8 @@ public class Check {
 		return false;
 	}
 
-	/**
-	 * 
-	 * @param selectedPiece
-	 * @param comestible
-	 * @return
-	 */
+	//--------------------------------------------------------------------------------------------------------------
+
 	public static boolean checkSelectedPieceInComestible(Piece selectedPiece, Map<Piece, int[]> comestible) {
 		if (comestible.containsKey(selectedPiece)) {
 			System.out.println("piece can eat");
@@ -40,12 +33,8 @@ public class Check {
 		return false;
 	}
 
-	/**
-	 * 
-	 * @param pi
-	 * @param d
-	 * @return
-	 */
+	//--------------------------------------------------------------------------------------------------------------
+
 	public static boolean checkSelectedPiece(Piece pi, Data d) {
 		if ((!d.isPlayer1Turn() && (pi.getColor() == d.getColorPlayer1() || pi.getColor() == d.getKingColorPlayer1())
 				|| (d.isPlayer1Turn()) && (pi.getColor() == d.getColorPlayer2() || pi.getColor() == d.getKingColorPlayer2()))) {
@@ -59,18 +48,14 @@ public class Check {
 		return true;
 	}
 
-	/**
-	 * 
-	 * @param pi
-	 * @param d
-	 * @return
-	 */
+	//--------------------------------------------------------------------------------------------------------------
+
 	public static boolean checkIfPieceCanMove(Piece pi, Data d) {
 		// Check if piece can move in 1 3 7 9 direction
 		if ((pi.getColor() == d.getColorPlayer2() && d.getBoard()[pi.getX() - 1][pi.getY() + 1] != '-' && // check for direction 1
 				d.getBoard()[pi.getX() + 1][pi.getY() + 1] != '-') || // check for direction 3
 				(pi.getColor() == d.getColorPlayer1() && d.getBoard()[pi.getX() - 1][pi.getY() - 1] != '-' && // check for direction 7
-						d.getBoard()[pi.getX() + 1][pi.getY() - 1] != '-')) { // check for direction 9
+					d.getBoard()[pi.getX() + 1][pi.getY() - 1] != '-')) { // check for direction 9
 			System.out.println("Can't move this piece");
 			return false;
 		}
@@ -79,11 +64,6 @@ public class Check {
 	
 	//--------------------------------------------------------------------------------------------------------------
 
-	/**
-	 * 
-	 * @param comestible
-	 * @return
-	 */
 	public static Map<Piece, int[]> checkIfCanEat(Map<Piece, int[]> comestible, Data d) {
 		char color = d.isPlayer1Turn() ? d.getColorPlayer1() : d.getColorPlayer2();
 		char enemi = d.isPlayer1Turn() ? d.getColorPlayer2() : d.getColorPlayer1();
@@ -120,16 +100,8 @@ public class Check {
 		return comestible;
 	}
 
+	//--------------------------------------------------------------------------------------------------------------
 
-		//--------------------------------------------------------------------------------------------------------------
-
-	/**
-	 * 
-	 * @param tabMap2
-	 * @param alPieces2
-	 * @param comestible
-	 * @return
-	 */
 	public static Map<Piece, int[]> checkIfKingCanEat(Data d,
 			Map<Piece, int[]> comestible) {
 

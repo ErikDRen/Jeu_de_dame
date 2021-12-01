@@ -39,8 +39,8 @@ public class Menu {
 				appliOn = false;
 				break;
 			default:
-				System.out.println("Something is wrong, what did you put ??"
-						+ "\nWe only accept Int btw 1-2");
+				System.out.println("Something is wrong, what did you put ?"
+						+ "\nWe only accept number btw 1-2");
 				break;
 			}
 		} while (appliOn);
@@ -54,6 +54,7 @@ public class Menu {
 
 		d.setColorPlayer1(pseudoPlayer1.charAt(0));
 		d.setColorPlayer2('O');
+		
 		d.setKingColorPlayer1('#');
 		d.setKingColorPlayer2('@');
 		
@@ -67,14 +68,14 @@ public class Menu {
 		
 		System.out.println("Player 1, choose a pseudo : ");
 		String player1 = Utilitaires.giveString();
-		System.out.println(player1 + "Choose a character to represent your pawn : ");
+		System.out.println(player1 + " Choose a character to represent your pawn : ");
 		String pseudoPlayer1 = Utilitaires.giveString();
 		System.out.println("Player 2, choose a pseudo : ");
 		String player2 = Utilitaires.giveString();
 		String pseudoPlayer2;
 		boolean check;
 		do{
-			System.out.println(player2 + "Choose a character to represent your pawn : ");
+			System.out.println(player2 + " Choose a character to represent your pawn : ");
 			pseudoPlayer2 = Utilitaires.giveString();
 			check = !(pseudoPlayer1.contentEquals(pseudoPlayer2));
 			if (!check){
@@ -84,6 +85,9 @@ public class Menu {
 		
 		d.setColorPlayer1(pseudoPlayer1.charAt(0));
 		d.setColorPlayer2(pseudoPlayer2.charAt(0));
+		
+		d.setKingColorPlayer1('#');
+		d.setKingColorPlayer2('@');
 		
 		Game g = new Game(player1, player2, d);
 		

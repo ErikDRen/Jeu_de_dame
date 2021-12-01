@@ -23,29 +23,28 @@ import java.util.ArrayList;
 
 public class Utilitaires {
 
-	/**
-	 * 
-	 * @return
-	 */
+	// --------------------------------------------------------------------------------------------------------------
+
 	public static String giveString() {
 		Scanner sc = new Scanner(System.in);
 		String s = sc.nextLine();
 		return s;
 	}
 
-	/**
-	 * 
-	 * @return
-	 */
+	// --------------------------------------------------------------------------------------------------------------
+
 	public static int giveInt() {
 		Scanner sc = new Scanner(System.in);
-		int num = sc.nextInt();
-		return num;
+		if (sc.hasNextInt()) {
+			int a = sc.nextInt();
+			return a;
+		} else {
+			return 3;
+		}
 	}
 
-	/**
-	 * 
-	 */
+	// --------------------------------------------------------------------------------------------------------------
+
 	public static Map<String, String> AJMapToStringNumber = new HashMap<String, String>() {
 		{
 			put("a", "1");
@@ -61,9 +60,8 @@ public class Utilitaires {
 		}
 	};
 
-	/**
-	 * 
-	 */
+	// --------------------------------------------------------------------------------------------------------------
+
 	static Map<String, String> StringNumberMapToAJ = new HashMap<String, String>() {
 		{
 			put("1", "a");
@@ -79,11 +77,8 @@ public class Utilitaires {
 		}
 	};
 
-	/**
-	 * 
-	 * @param reponse
-	 * @return
-	 */
+	// --------------------------------------------------------------------------------------------------------------
+
 	public static Coordonee convertStringNumberToCoordonee(String reponse) {
 		String[] parts = reponse.split(",");
 
@@ -96,11 +91,8 @@ public class Utilitaires {
 		return coordonee;
 	}
 
-	/**
-	 * 
-	 * @param co
-	 * @return
-	 */
+	// --------------------------------------------------------------------------------------------------------------
+
 	public static String convertCoordoneeToAJ(Coordonee co) {
 		String X = co.getStringX();
 		String Y = co.getStringY();
@@ -138,14 +130,13 @@ public class Utilitaires {
 
 	/**
 	 * saveTab will write in the player file the map;
+	 * 
 	 * @param tabMap
 	 * @param FILENAME
 	 * @param sizeY
 	 * @throws IOException
 	 */
 	public static void saveTab(char[][] tabMap, String FILENAME, int sizeY) throws IOException {
-
-		
 
 		BufferedWriter writer = new BufferedWriter(new FileWriter(FILENAME, true));
 
@@ -169,7 +160,8 @@ public class Utilitaires {
 	}
 
 	/**
-	 *  It creates a folder with the player’s name
+	 * It creates a folder with the player’s name
+	 * 
 	 * @param playerName
 	 * @throws IOException
 	 */
@@ -184,6 +176,7 @@ public class Utilitaires {
 
 	/**
 	 * It will return the current date, to know when the match has been played
+	 * 
 	 * @return
 	 */
 	public static String giveDate() {
@@ -194,7 +187,8 @@ public class Utilitaires {
 	}
 
 	/**
-	 *  It will write in the player file when he will play a new match.
+	 * It will write in the player file when he will play a new match.
+	 * 
 	 * @param dateNow
 	 * @param fileName
 	 * @throws IOException
@@ -258,12 +252,14 @@ public class Utilitaires {
 
 	/**
 	 * This function will creates the pawns
+	 * 
 	 * @param d
 	 */
 	public static void createPieces(Data d) {
 		// TODO Auto-generated method stub
 		int xEndLine = 4;
 		int oEndLine = 10;
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Uncomment /*2*/ for practical test !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		for (int x = 1; x < d.getBoard().length - 2 /* 2 */; x += 2) {
 			for (int i = 1; i < xEndLine; i += 2) {
 				d.getAlPieces().add(new Piece(x, i, d.getColorPlayer2(), d.getKingColorPlayer2(), false));
@@ -278,6 +274,7 @@ public class Utilitaires {
 
 	/**
 	 * This function will creates the board and put the pawns in it
+	 * 
 	 * @param map
 	 * @param alPieces
 	 */
@@ -301,6 +298,7 @@ public class Utilitaires {
 
 	/**
 	 * The player can choose his
+	 * 
 	 * @param d
 	 * @param pseudo
 	 * @param skin
