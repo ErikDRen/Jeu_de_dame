@@ -1,4 +1,4 @@
-# Jeu_de_dame
+# DRAUGHT GAME !!
 
 Welcome to our little draught game !!
 
@@ -21,6 +21,5 @@ Whenever a piece has an opponent's piece adjacent to it and the square immediate
 If more than one piece can capture, then the player is entirely free to choose which of those pieces to move. Likewise, if a capturing piece is able to capture in more than one direction, the player is free to choose which direction to move in. i.e. it is not compulsory to move the piece or take the route that will result in the maximum number of captures.
 
 If no capturing moves are available, then an ordinary move is made by moving a piece one square diagonally.
-In the past, the "huffing" rule was used. For this, if a player noticed that the opponent had failed to capture when the option was open (even if the offending piece had already captured one or more pieces that turn), the player can huff the offending piece before the next move is made and it is removed from the board. Nowadays, this rule is rarely used. Instead a player just points out the error and the opponent is forced to make the correct move.
 
 The game is won by the player who first manages to take all his opponent's pieces or renders them unable to move.
