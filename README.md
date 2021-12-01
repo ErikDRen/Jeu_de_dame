@@ -27,9 +27,10 @@ The game is won by the player who first manages to take all his opponent's piece
 
 
 # HOW TO PLAY
+![alt text](https://game.capcom.com/cfn/sfv/column/tenkeyen.jpg?h=11440521e663f2acbd0a3dd808f1dfb4)
 
 THIS GAME USE PAD DIRECTION 1,3,7,9 TO MOOVE, EAT, ETC....
-![alt text](https://game.capcom.com/cfn/sfv/column/tenkeyen.jpg?h=11440521e663f2acbd0a3dd808f1dfb4)
+
 Start by choosing the number of player, choose 1 to play vs an IA and choose 2 to play vs another player !
 
 select a piece with her coordinate (letter fist, number second),
