@@ -56,7 +56,10 @@ public class Game {
 			}
 
 			Utilitaires.saveTab(d.getBoard(), d.getFileNameP1(), d.getSizeY());
-			Utilitaires.saveTab(d.getBoard(), d.getFileNameP2(), d.getSizeY());
+			if (d.getPlayer2() != "IA"){
+				Utilitaires.saveTab(d.getBoard(), d.getFileNameP2(), d.getSizeY());
+			}
+			
 		} while (d.isGameOn());
 	}
 
@@ -473,7 +476,9 @@ public class Game {
 		String dateNow = Utilitaires.giveDate();
 		// Create a folder if there is no folder for the player to save their game.
 		Utilitaires.createFolderForUser(d.getPlayer1());
-		Utilitaires.createFolderForUser(d.getPlayer2());
+		if(d.getPlayer2() != "AI"){
+			Utilitaires.createFolderForUser(d.getPlayer2());
+		}
 		// Create name file for history
 		d.setFileNameP1("./" + d.getPlayer1() + "/history " + d.getPlayer1() + " VS " + d.getPlayer2() + ".txt");
 		d.setFileNameP2("./" + d.getPlayer2() + "/history " + d.getPlayer2() + " VS " + d.getPlayer1() + ".txt");
