@@ -8,6 +8,7 @@ import java.util.Map;
 
 import utile.Check;
 import data.Data;
+import model.IA;
 import model.Piece;
 import utile.Utilitaires;
 
@@ -15,19 +16,24 @@ public class Game {
 
 	Data d;
 	Check c = new Check();
-
+	IA ia;
 	public Game(String p1, String p2, Data d) {
 		super();
 		this.d = d;
 
 		d.setPlayer1(p1);
 		d.setPlayer2(p2);
-
-		d.setKingColorPlayer1('#');
-		d.setKingColorPlayer2('@');
 	}
 
 	//--------------------------------------------------------------------------------------------------------------
+
+	public Game(String p1, String string, Data d, boolean isVsIA) {
+		super();
+		this.d = d;
+		this.ia = new IA();
+		d.setPlayer1(p1);
+		d.setPlayer2("IA");
+	}
 
 	/**
 	 * The game function is the core of the program, it will call functions for the execution of the game.
@@ -43,7 +49,11 @@ public class Game {
 			Map<Piece, int[]> comestible = new HashMap<Piece, int[]>();
 			comestible = Check.checkIfCanEat(comestible, d);
 			comestible = Check.checkIfKingCanEat(d, comestible);
-			playerTurn(comestible);
+			if(!(d.isPlayer1Turn()) && d.isVsIA() == true) {
+				IATurn(comestible);
+			}else {
+				playerTurn(comestible);
+			}
 
 			Utilitaires.saveTab(d.getBoard(), d.getFileNameP1(), d.getSizeY());
 			Utilitaires.saveTab(d.getBoard(), d.getFileNameP2(), d.getSizeY());
@@ -51,6 +61,67 @@ public class Game {
 	}
 
 	//--------------------------------------------------------------------------------------------------------------
+
+	private void IATurn(Map<Piece, int[]> comestible) {
+		boolean check = false;
+		boolean mooved = false;
+		Piece selectedPiece;
+		if(checkIfStillHavePieces()){
+			do {
+				if (comestible.isEmpty()) {
+					
+					if (!Check.checkIfPlayerCanMove(d)) {
+						System.out.println("/!\\ Vous ne pouvez pas jouer, votre tour est passer /!\\");
+						d.setPlayer1Turn(!d.isPlayer1Turn());
+						return;
+					}
+					
+					do {
+						selectedPiece = ia.selectPieceIA(d);
+						check = Check.checkSelectedPiece(selectedPiece,d);
+					} while (!check);
+					
+					if (selectedPiece.getColor() == d.getKingColorPlayer2()
+							|| selectedPiece.getColor() == d.getKingColorPlayer1()) {
+						mooved = ia.moveKingSelectedIA(d, selectedPiece);
+					} else {
+						mooved = ia.movePieceSelectedIA(selectedPiece, d);
+					}
+	
+				} else {
+					System.out.println("IA can eat");
+					do {
+						selectedPiece = ia.selectPieceIA(d);
+						check = Check.checkSelectedPieceInComestible(selectedPiece, comestible);
+					} while (!check);
+	
+					do {
+						if (selectedPiece.getColor() == d.getColorPlayer2()
+								|| selectedPiece.getColor() == d.getKingColorPlayer1()) {
+							// mooveKingToEat ??
+						} // else ?
+						mooved = mooveToEat(selectedPiece, comestible);
+						comestible.clear();
+						comestible = Check.checkIfCanEat(comestible, d);
+						comestible = Check.checkIfKingCanEat(d, comestible);
+	
+					} while (Check.checkSelectedPieceInComestible(selectedPiece, comestible));
+				}
+			} while (!mooved);
+			if (selectedPiece.getColor() == d.getColorPlayer2() && selectedPiece.getY() == 10) {
+				System.out.print("One of your piece became a king.");
+				becomeKings(selectedPiece,d);
+			}
+			if (selectedPiece.getColor() == d.getColorPlayer1() && selectedPiece.getY() == 1) {
+				System.out.print("One of your piece became a king.");
+				becomeKings(selectedPiece,d);
+			}
+			d.setPlayer1Turn(!d.isPlayer1Turn());
+		}else {
+			System.out.println("Perdu !");
+		}
+
+	}
 
 	/**
 	 * The turn manager ! 
@@ -64,15 +135,18 @@ public class Game {
 		if(checkIfStillHavePieces()){
 			do {
 				if (comestible.isEmpty()) {
+					
 					if (!Check.checkIfPlayerCanMove(d)) {
 						System.out.println("/!\\ Vous ne pouvez pas jouer, votre tour est pass� /!\\");
 						d.setPlayer1Turn(!d.isPlayer1Turn());
 						return;
 					}
+					
 					do {
 						selectedPiece = selectPieceToMove(d.getBoard(), d.getAlPieces());
 						check = Check.checkSelectedPiece(selectedPiece,d);
 					} while (!check);
+					
 					if (selectedPiece.getColor() == d.getKingColorPlayer2()
 							|| selectedPiece.getColor() == d.getKingColorPlayer1()) {
 						mooved = moveKingSelected(Utilitaires.giveString(), selectedPiece);
@@ -81,7 +155,7 @@ public class Game {
 					}
 	
 				} else {
-					System.out.println("nop");
+					System.out.println("You can eat");
 					do {
 						selectedPiece = selectPieceToMove(d.getBoard(), d.getAlPieces());
 						check = Check.checkSelectedPieceInComestible(selectedPiece, comestible);

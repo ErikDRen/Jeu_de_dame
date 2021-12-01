@@ -30,6 +30,7 @@ public class Menu {
 			switch (choice) {
 			case 1:
 				System.out.println("you choose 1");
+				startPlayervsIAGame();
 				appliOn = false;
 				break;
 			case 2:
@@ -43,6 +44,23 @@ public class Menu {
 				break;
 			}
 		} while (appliOn);
+	}
+
+	private void startPlayervsIAGame() throws IOException {
+		System.out.println("Player 1, choose a pseudo : ");
+		String player1 = Utilitaires.giveString();
+		System.out.println(player1 + "Choose a character to represent your pawn : ");
+		String pseudoPlayer1 = Utilitaires.giveString();
+
+		d.setColorPlayer1(pseudoPlayer1.charAt(0));
+		d.setColorPlayer2('O');
+		d.setKingColorPlayer1('#');
+		d.setKingColorPlayer2('@');
+		
+		d.setVsIA(true);
+		Game g = new Game(player1, "", d, true);
+		
+		g.game();
 	}
 
 	private void startPlayervsPlayerGame() throws IOException {

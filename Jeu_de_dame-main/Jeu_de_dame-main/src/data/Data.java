@@ -26,6 +26,16 @@ public class Data {
 
 	// final static String FILENAME = "./history.txt";
 	boolean gameOn = true;
+	boolean vsIA = false;
+
+	public boolean isVsIA() {
+		return vsIA;
+	}
+
+	public void setVsIA(boolean vsIA) {
+		this.vsIA = vsIA;
+	}
+
 	ArrayList<Piece> alPieces = new ArrayList<Piece>();
 
 	// List for kings
