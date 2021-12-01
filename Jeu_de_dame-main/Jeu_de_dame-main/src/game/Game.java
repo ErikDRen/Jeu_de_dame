@@ -57,7 +57,7 @@ public class Game {
 			comestible = Check.checkIfCanEat(comestible, d);
 			comestible = Check.checkIfKingCanEat(d, comestible);
 			if(!(d.isPlayer1Turn()) && d.isVsIA() == true) {
-				IATurn(comestible);
+				turnIA(comestible);
 			}else {
 				playerTurn(comestible);
 			}
@@ -72,7 +72,7 @@ public class Game {
 
 	//--------------------------------------------------------------------------------------------------------------
 
-	private void IATurn(Map<Piece, int[]> comestible) {
+	private void turnIA(Map<Piece, int[]> comestible) {
 		boolean check = false;
 		boolean mooved = false;
 		Piece selectedPiece;
