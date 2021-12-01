@@ -58,7 +58,7 @@ public class Menu {
 		do{
 			System.out.println(player2 + "Choose a character to represent your pawn : ");
 			pseudoPlayer2 = Utilitaires.giveString();
-			check = pseudoPlayer1 != pseudoPlayer2;
+			check = !(pseudoPlayer1.contentEquals(pseudoPlayer2));
 			if (!check){
 				System.out.println("you can't choose the same character as player 1, plz retry ...");
 			}

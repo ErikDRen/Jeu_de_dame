@@ -64,14 +64,14 @@ public class Game {
 		if(checkIfStillHavePieces()){
 			do {
 				if (comestible.isEmpty()) {
-					if (!c.checkIfPlayerCanMove(d)) {
+					if (!Check.checkIfPlayerCanMove(d)) {
 						System.out.println("/!\\ Vous ne pouvez pas jouer, votre tour est pass� /!\\");
 						d.setPlayer1Turn(!d.isPlayer1Turn());
 						return;
 					}
 					do {
 						selectedPiece = selectPieceToMove(d.getBoard(), d.getAlPieces());
-						check = c.checkSelectedPiece(selectedPiece,d);
+						check = Check.checkSelectedPiece(selectedPiece,d);
 					} while (!check);
 					if (selectedPiece.getColor() == d.getKingColorPlayer2()
 							|| selectedPiece.getColor() == d.getKingColorPlayer1()) {
@@ -84,7 +84,7 @@ public class Game {
 					System.out.println("nop");
 					do {
 						selectedPiece = selectPieceToMove(d.getBoard(), d.getAlPieces());
-						check = c.checkSelectedPieceInComestible(selectedPiece, comestible);
+						check = Check.checkSelectedPieceInComestible(selectedPiece, comestible);
 					} while (!check);
 	
 					do {
@@ -97,7 +97,7 @@ public class Game {
 						comestible = Check.checkIfCanEat(comestible, d);
 						comestible = Check.checkIfKingCanEat(d, comestible);
 	
-					} while (c.checkSelectedPieceInComestible(selectedPiece, comestible));
+					} while (Check.checkSelectedPieceInComestible(selectedPiece, comestible));
 				}
 			} while (!mooved);
 			if (selectedPiece.getColor() == d.getColorPlayer2() && selectedPiece.getY() == 10) {
@@ -109,13 +109,20 @@ public class Game {
 				becomeKings(selectedPiece,d);
 			}
 			d.setPlayer1Turn(!d.isPlayer1Turn());
+		}else {
+			System.out.println("Perdu !");
 		}
 
 	}
 
 	private boolean checkIfStillHavePieces() {
+		char color = d.isPlayer1Turn() ? d.getColorPlayer1() : d.getColorPlayer2();
+		char kingColor = d.isPlayer1Turn() ? d.getKingColorPlayer1() : d.getKingColorPlayer2();
+
 		for(Piece p : d.getAlPieces()) {
-			//if(p.getColor())
+			if(p.getColor() == color || p.getColor() == kingColor) {
+				return true;
+			}
 		} 
 		return false;
 	}
